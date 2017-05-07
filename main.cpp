@@ -62,6 +62,7 @@ class Board {
 
 	bool newRegion(std::vector<Point> &regionPoints, int index) {
 		Point start;
+		//Make sure we have somewhere to start
 		if (!randomEmptyCell(start)) {
 			return false;
 		}
@@ -80,6 +81,7 @@ class Board {
 			if (next.x < (extent.x - 1) && indices[next.x + 1][next.y] == -1) emptyPoints.push_back(Point(next.x + 1, next.y));
 			if (next.y > 0              && indices[next.x][next.y - 1] == -1) emptyPoints.push_back(Point(next.x, next.y - 1));
 			if (next.y < (extent.y - 1) && indices[next.x][next.y + 1] == -1) emptyPoints.push_back(Point(next.x, next.y + 1));
+			//Nothing? How sad.
 			if (emptyPoints.size() == 0) break;
 
 			//Add a random one
@@ -95,9 +97,11 @@ class Board {
 	}
 
 	void assignRegions() {
+		//Make new regions until we run out of points
 		std::vector<Point> regionPoints;
 		for (int index = 0; newRegion(regionPoints, index); index ++) {
 			regions.push_back(Region(regionPoints, index));
+			//So we have an empty vector for the next one
 			regionPoints.clear();
 		}
 	}
@@ -211,17 +215,21 @@ public:
 		if (!fillSlice(index)) {
 			return false;
 		}
+		//Explode them in the order they are added so we don't recurse
 		for (auto it = explodeRegions.begin(); it != explodeRegions.end(); ) {
 			print();
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 
+			//Remove from exploded region
 			Region &region = regions[*it];
 			region.fill -= region.neighbors.size();
+			//And fill each neighbor with one (optionally exploding those too)
 			for (auto &neighborIndex : region.neighbors) {
 				if (!fillSlice(neighborIndex)) {
 					return false;
 				}
 			}
+			//Advance
 			it = explodeRegions.erase(it);
 
 			//Keep going!
