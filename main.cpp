@@ -140,91 +140,48 @@ public:
 	const Region &getRegion(int index) const { return regions[index]; }
 
 	void print() const {
-		for (int y = 0; y < extent.y; y ++) {
+		for (int y = 0; y < extent.y + 1; y ++) {
 			enum Pass : int {
 				TopBorder,
 				Center,
-				BottomBorder,
 				MaxPasses
 			};
 			for (int pass = TopBorder; pass < MaxPasses; pass ++) {
-				for (int x = 0; x < extent.x; x++) {
-					bool topEdge = edges.find({Point(x, y - 1), Point(x, y)}) != edges.end();
-					bool leftEdge = edges.find({Point(x - 1, y), Point(x, y)}) != edges.end();
-					bool rightEdge = edges.find({Point(x, y), Point(x + 1, y)}) != edges.end();
-					bool bottomEdge = edges.find({Point(x, y), Point(x, y + 1)}) != edges.end();
-					switch (pass) {
-						case TopBorder:
-							if (topEdge) {
-								if (leftEdge) {
-									std::cout << "+";
-								} else {
-									std::cout << "-";
-								}
-								std::cout << "--";
-								if (rightEdge) {
-									std::cout << "+";
-								} else {
-									std::cout << "-";
-								}
+				for (int x = 0; x < extent.x + 1; x++) {
+					bool topEdge    = edges.find({Point(x, y - 1), Point(x, y)}) != edges.end();
+					bool leftEdge   = edges.find({Point(x - 1, y), Point(x, y)}) != edges.end();
+					bool leftTopEdge = edges.find({Point(x - 1, y - 1), Point(x - 1, y)}) != edges.end();
+					bool topLeftEdge = edges.find({Point(x - 1, y - 1), Point(x, y - 1)}) != edges.end();
+					if (pass == TopBorder) {
+						if (topEdge) {
+							if (leftEdge || topLeftEdge) {
+								std::cout << "+";
 							} else {
-								if (leftEdge) {
-									std::cout << "|";
-								} else {
-									std::cout << " ";
-								}
-								std::cout << "  ";
-								if (rightEdge) {
-									std::cout << "|";
-								} else {
-									std::cout << " ";
-								}
+								std::cout << "-";
 							}
-							break;
-						case Center:
-							if (leftEdge) {
+							std::cout << "---";
+						} else {
+							if (leftTopEdge) {
+								std::cout << "+";
+							} else if (leftEdge) {
 								std::cout << "|";
 							} else {
 								std::cout << " ";
 							}
-							std::cout << std::setw(2) << regions[indices[x][y]].neighbors.size();
-							if (rightEdge) {
-								std::cout << "|";
-							} else {
-								std::cout << " ";
-							}
-							break;
-						case BottomBorder:
-							if (bottomEdge) {
-								if (leftEdge) {
-									std::cout << "+";
-								} else {
-									std::cout << "-";
-								}
-								std::cout << "--";
-								if (rightEdge) {
-									std::cout << "+";
-								} else {
-									std::cout << "-";
-								}
-							} else {
-								if (leftEdge) {
-									std::cout << "|";
-								} else {
-									std::cout << " ";
-								}
-								std::cout << "  ";
-								if (rightEdge) {
-									std::cout << "|";
-								} else {
-									std::cout << " ";
-								}
-							}
-							break;
-						default:
-							break;
+							std::cout << "   ";
+						}
+					} else if (pass == Center) {
+						if (leftEdge) {
+							std::cout << "|";
+						} else {
+							std::cout << " ";
+						}
+						if (x < extent.x && y < extent.y) {
+							std::cout << " " << std::setw(2) << std::left << regions[indices[x][y]].neighbors.size();
+						} else {
+							std::cout << "  ";
+						}
 					}
-
 				}
 				std::cout << std::endl;
 			}
