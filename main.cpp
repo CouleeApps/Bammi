@@ -3,6 +3,9 @@
 #include <vector>
 #include <random>
 #include <set>
+#include <deque>
+#include <chrono>
+#include <thread>
 
 struct Point {
 	int x;
@@ -20,14 +23,16 @@ struct Region {
 	//Use a set so we don't have to worry about duplicates
 	std::set<int> neighbors;
 	int index;
+	int fill;
 
-	Region(const std::vector<Point> &points, int index) : points(points), index(index) {}
+	Region(const std::vector<Point> &points, int index) : points(points), index(index), fill(0) {}
 };
 
 class Board {
 	std::vector<std::vector<int>> indices;
 	std::set<std::pair<Point, Point>> edges;
 	std::vector<Region> regions;
+	std::deque<int> explodeRegions;
 	Point extent;
 
 	bool randomEmptyCell(Point &point) {
@@ -100,7 +105,7 @@ class Board {
 	void findNeighbors() {
 		for (auto &region : regions) {
 			for (const auto &point : region.points) {
-				//Up to four
+				//Up to four, check if they're a different region
 				if (point.x > 0              && indices[point.x - 1][point.y] != region.index) region.neighbors.insert(indices[point.x - 1][point.y]);
 				if (point.x < (extent.x - 1) && indices[point.x + 1][point.y] != region.index) region.neighbors.insert(indices[point.x + 1][point.y]);
 				if (point.y > 0              && indices[point.x][point.y - 1] != region.index) region.neighbors.insert(indices[point.x][point.y - 1]);
@@ -113,8 +118,12 @@ class Board {
 		for (int x = 0; x < extent.x; x ++) {
 			for (int y = 0; y < extent.y; y ++) {
 				int at = indices[x][y];
+				//Edge of the board
 				if (x == 0) edges.insert({Point(-1, y), Point(x, y)});
+				//Or the tile to the left is a different region
 				else if (indices[x - 1][y] != at) edges.insert({Point(x - 1, y), Point(x, y)});
+
+				//Same thing x4
 				if (y == 0) edges.insert({Point(x, -1), Point(x, y)});
 				else if (indices[x][y - 1] != at) edges.insert({Point(x, y - 1), Point(x, y)});
 				if (x == extent.x - 1) edges.insert({Point(x, y), Point(extent.x, y)});
@@ -148,8 +157,8 @@ public:
 			};
 			for (int pass = TopBorder; pass < MaxPasses; pass ++) {
 				for (int x = 0; x < extent.x + 1; x++) {
-					bool topEdge    = edges.find({Point(x, y - 1), Point(x, y)}) != edges.end();
-					bool leftEdge   = edges.find({Point(x - 1, y), Point(x, y)}) != edges.end();
+					bool topEdge     = edges.find({Point(x, y - 1), Point(x, y)}) != edges.end();
+					bool leftEdge    = edges.find({Point(x - 1, y), Point(x, y)}) != edges.end();
 					bool leftTopEdge = edges.find({Point(x - 1, y - 1), Point(x - 1, y)}) != edges.end();
 					bool topLeftEdge = edges.find({Point(x - 1, y - 1), Point(x, y - 1)}) != edges.end();
 					if (pass == TopBorder) {
@@ -177,7 +186,12 @@ public:
 							std::cout << " ";
 						}
 						if (x < extent.x && y < extent.y) {
-							std::cout << " " << std::setw(2) << std::left << regions[indices[x][y]].neighbors.size();
+							if (std::find(explodeRegions.begin(), explodeRegions.end(), indices[x][y]) != explodeRegions.end()) {
+								std::cout << "*";
+							} else {
+								std::cout << " ";
+							}
+							std::cout << std::setw(2) << std::left << regions[indices[x][y]].fill;
 						} else {
 							std::cout << "  ";
 						}
@@ -187,10 +201,60 @@ public:
 			}
 		}
 	}
+
+	bool fillSlice(const Point &point) {
+		if (point.x < 0) return false;
+		if (point.y < 0) return false;
+		if (point.x >= extent.x) return false;
+		if (point.y >= extent.y) return false;
+		int index = indices[point.x][point.y];
+		if (!fillSlice(index)) {
+			return false;
+		}
+		for (auto it = explodeRegions.begin(); it != explodeRegions.end(); ) {
+			print();
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+
+			Region &region = regions[*it];
+			region.fill -= region.neighbors.size();
+			for (auto &neighborIndex : region.neighbors) {
+				if (!fillSlice(neighborIndex)) {
+					return false;
+				}
+			}
+			it = explodeRegions.erase(it);
+
+			//Keep going!
+			if (region.fill > region.neighbors.size()) {
+				//Split!
+				explodeRegions.push_back(region.index);
+			}
+		}
+		return true;
+	}
+	bool fillSlice(int index) {
+		Region &region = regions[index];
+		region.fill ++;
+		if (region.fill > region.neighbors.size() &&
+				std::find(explodeRegions.begin(), explodeRegions.end(), region.index) == explodeRegions.end()) {
+			//Split!
+			explodeRegions.push_back(region.index);
+		}
+		return true;
+	}
 };
 
 int main() {
 	Board b(Point(10, 10));
-
 	b.print();
+
+	while (true) {
+		Point p;
+		std::cin >> p.x >> p.y;
+		if (!b.fillSlice(p)) {
+			std::cout << "No" << std::endl;
+			break;
+		}
+		b.print();
+	}
 }
