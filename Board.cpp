@@ -115,7 +115,7 @@ void Board::findEdges() {
 	}
 }
 
-bool Board::move(const Point &point, Region::Player player) {
+bool Board::move(const Point &point, int player) {
 	if (point.x < 0) return false;
 	if (point.y < 0) return false;
 	if (point.x >= extent.x) return false;
@@ -124,7 +124,7 @@ bool Board::move(const Point &point, Region::Player player) {
 	return move(index, player);
 }
 
-bool Board::move(int index, Region::Player player) {
+bool Board::move(int index, int player) {
 	if (!fillSlice(index, player)) {
 		return false;
 	}
@@ -146,6 +146,12 @@ bool Board::move(int index, Region::Player player) {
 		//Advance
 		it = explodeRegions.erase(it);
 
+		//Has someone won?
+		int winner;
+		if (getWinner(winner)) {
+			return true;
+		}
+
 		//Keep going!
 		if (region.fill > region.size()) {
 			//Split!
@@ -155,9 +161,9 @@ bool Board::move(int index, Region::Player player) {
 	return true;
 }
 
-bool Board::fillSlice(int index, Region::Player player) {
+bool Board::fillSlice(int index, int player) {
 	Region &region = regions[index];
-	if (region.owner != player && region.owner != Region::Nobody) {
+	if (region.owner != player && region.owner != -1) {
 		return false;
 	}
 	region.fill ++;
@@ -167,4 +173,27 @@ bool Board::fillSlice(int index, Region::Player player) {
 		explodeRegions.push_back(region.index);
 	}
 	return true;
+}
+
+bool Board::getWinner(int &winner) const {
+	//See if this wins us the game
+	winner = -1;
+	bool winning = false;
+	for (const auto &copyRegion : regions) {
+		//Not everything is covered
+		if (copyRegion.owner == -1) {
+			return false;
+		}
+		if (winner == -1) {
+			winner = copyRegion.owner;
+			winning = true;
+		}
+		//Nope, so stop looking
+		if (copyRegion.owner != winner) {
+			winning = false;
+			break;
+		}
+	}
+
+	return winning;
 }

@@ -9,10 +9,9 @@
 
 class Screen {
 public:
-	Screen();
-	void print(const Board &board) const;
-	bool getMove(Point &move) const;
+	virtual ~Screen() {}
+	virtual void print(const Board &board) const = 0;
+	virtual bool getMove(Point &move) const = 0;
 };
-
 
 #endif //BAMMI_SCREEN_H

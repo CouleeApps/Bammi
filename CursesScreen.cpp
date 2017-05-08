@@ -2,7 +2,7 @@
 // Created by Glenn Smith on 5/7/17.
 //
 
-#include "Screen.h"
+#include "CursesScreen.h"
 #include <iostream>
 #include <iomanip>
 #include <curses.h>
@@ -12,7 +12,10 @@ void finish(int) {
 	exit(0);
 }
 
-Screen::Screen() {
+CursesScreen::CursesScreen() {
+	if (getenv("TERM") == NULL) {
+		throw 0;
+	}
 	signal(SIGINT, finish);
 	initscr();
 	keypad(stdscr, TRUE);
@@ -25,12 +28,13 @@ Screen::Screen() {
 	if (has_colors()) {
 		start_color();
 
-		init_pair(1, COLOR_RED, COLOR_BLACK);
-		init_pair(2, COLOR_BLUE, COLOR_BLACK);
+		init_pair(0, COLOR_BLACK, COLOR_BLACK);
+		init_pair(1, COLOR_BLACK, COLOR_BLUE);
+		init_pair(2, COLOR_BLACK, COLOR_RED);
 	}
 }
 
-void Screen::print(const Board &board) const {
+void CursesScreen::print(const Board &board) const {
 	for (int y = 0; y < board.extent.y + 1; y++) {
 		enum Pass : int {
 			TopBorder,
@@ -97,6 +101,18 @@ void Screen::print(const Board &board) const {
 						              board.indices[x][y]) != board.explodeRegions.end()) {
 							mvaddch(y * 2 + 1, x * 4 + 1, '*');
 						}
+						switch (board.regions[board.indices[x][y]].owner) {
+							case 0:
+								attrset(COLOR_PAIR(1));
+								break;
+							case 1:
+								attrset(COLOR_PAIR(2));
+								break;
+							default:
+								attrset(COLOR_PAIR(0));
+								break;
+						}
+						mvaddch(y * 2 + 1, x * 4 + 1, ' ');
 						char num[3];
 						snprintf(num, 3, "%d", board.regions[board.indices[x][y]].fill);
 						mvaddch(y * 2 + 1, x * 4 + 2, num[0]);
@@ -105,6 +121,7 @@ void Screen::print(const Board &board) const {
 						} else {
 							mvaddch(y * 2 + 1, x * 4 + 3, ' ');
 						}
+						attrset(COLOR_PAIR(0));
 					}
 				}
 			}
@@ -113,7 +130,7 @@ void Screen::print(const Board &board) const {
 	refresh();
 }
 
-bool Screen::getMove(Point &move) const {
+bool CursesScreen::getMove(Point &move) const {
 	MEVENT mouse;
 
 	int ch = 0;

@@ -11,11 +11,15 @@
 class AI {
 	Board *board;
 	std::vector<int> myRegions;
+	int player;
 
+	void updateMyRegions();
 	bool basicMove(int maxSize, int &move);
+	bool obviousExplode(int &move);
+	bool winningMove(int &move);
 
 public:
-	AI(Board *board) : board(board) {}
+	AI(Board *board, int player) : board(board), player(player) {}
 	bool getMove(int &move);
 };
 

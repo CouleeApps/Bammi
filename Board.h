@@ -27,19 +27,15 @@ struct Region {
 	int size() const { return static_cast<int>(neighbors.size()); }
 	int index;
 	int fill;
-	enum Player {
-		Nobody,
-		Human,
-		AI,
-		MaxPlayers
-	} owner;
+	int owner;
 
-	Region(const std::vector<Point> &points, int index) : points(points), index(index), fill(0), owner(Nobody) {}
+	Region(const std::vector<Point> &points, int index) : points(points), index(index), fill(0), owner(-1) {}
 };
 
 class Board {
 	friend class AI;
-	friend class Screen;
+	friend class CursesScreen;
+	friend class CoutScreen;
 
 	std::vector<std::vector<int>> indices;
 	std::set<std::pair<Point, Point>> edges;
@@ -53,7 +49,7 @@ class Board {
 	void findNeighbors();
 	void findEdges();
 
-	bool fillSlice(int index, Region::Player player);
+	bool fillSlice(int index, int player);
 public:
 	Board(const Point &extent);
 
@@ -63,8 +59,10 @@ public:
 	Region &getRegion(int index) { return regions[index]; }
 	const Region &getRegion(int index) const { return regions[index]; }
 
-	bool move(const Point &point, Region::Player player);
-	bool move(int index, Region::Player player);
+	bool move(const Point &point, int player);
+	bool move(int index, int player);
+
+	bool getWinner(int &winner) const;
 };
 
 
