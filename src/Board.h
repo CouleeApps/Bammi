@@ -34,8 +34,6 @@ struct Region {
 };
 
 class Board {
-	friend class AI;
-
 public:
 	class Layout {
 		friend class Board;
@@ -71,7 +69,9 @@ public:
 	Board(Layout &layout);
 
 	const int getIndex(const Point &p) const { return mLayout.mIndices[p.x][p.y]; }
+	const Region &getRegion(int index) const { return mRegions[index]; }
 	const Region &getRegion(const Point &p) const { return mRegions[getIndex(p)]; }
+	const std::vector<Region> &getRegions() const { return mRegions; }
 
 	Point getExtent() const { return mLayout.mExtent; }
 	void getRegionPoints(int index, std::vector<Point> &points) const { mLayout.getRegionPoints(index, points); }
