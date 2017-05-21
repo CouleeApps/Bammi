@@ -11,6 +11,95 @@ Board::Board(Layout &layout) : mLayout(layout) {
 	}
 }
 
+bool Board::move(const Point &point, int player) {
+	if (point.x < 0) return false;
+	if (point.y < 0) return false;
+	if (point.x >= mLayout.mExtent.x) return false;
+	if (point.y >= mLayout.mExtent.y) return false;
+	int index = mLayout.mIndices[point.x][point.y];
+	return move(index, player);
+}
+
+bool Board::move(int index, int player) {
+	mLastMove.clear();
+
+	if (!fillSlice(index, player)) {
+		return false;
+	}
+	mRegions[index].owner = player;
+
+	//Explode them in the order they are added so we don't recurse
+	for (auto it = mExplodeRegions.begin(); it != mExplodeRegions.end(); ) {
+		//Remove from exploded region
+		Region &region = mRegions[*it];
+		region.fill -= mLayout.getRegionMax(region.index);
+		//And fill each neighbor with one (optionally exploding those too)
+		for (auto &neighborIndex : mLayout.getRegionNeighbors(region.index)) {
+			//We control this now
+			mRegions[neighborIndex].owner = player;
+			if (!fillSlice(neighborIndex, player)) {
+				return false;
+			}
+		}
+		//Advance
+		it = mExplodeRegions.erase(it);
+
+		//Has someone won?
+		int winner;
+		if (getWinner(winner)) {
+			return true;
+		}
+
+		//Keep going!
+		if (region.fill > mLayout.getRegionMax(region.index)) {
+			//Split!
+			mExplodeRegions.push_back(region.index);
+		}
+	}
+	return true;
+}
+
+bool Board::fillSlice(int index, int player) {
+	Region &region = mRegions[index];
+	if (region.owner != player && region.owner != -1) {
+		return false;
+	}
+	region.fill ++;
+	if (region.fill > mLayout.getRegionMax(region.index) &&
+	    std::find(mExplodeRegions.begin(), mExplodeRegions.end(), region.index) == mExplodeRegions.end()) {
+		//Split!
+		mExplodeRegions.push_back(region.index);
+	}
+	mLastMove.push_back(index);
+	return true;
+}
+
+bool Board::getWinner(int &winner) const {
+	//See if this wins us the game
+	winner = -1;
+	bool winning = false;
+	for (const auto &copyRegion : mRegions) {
+		//Not everything is covered
+		if (copyRegion.owner == -1) {
+			return false;
+		}
+		if (winner == -1) {
+			winner = copyRegion.owner;
+			winning = true;
+		}
+		//Nope, so stop looking
+		if (copyRegion.owner != winner) {
+			winning = false;
+			break;
+		}
+	}
+
+	return winning;
+}
+
+//---------------------------------------------------------------------------------------
+
+
 Board::Layout::Layout(const Point &extent) : mExtent(extent) {
 	mIndices = std::vector<std::vector<int>>(static_cast<size_t>(extent.x), std::vector<int>(static_cast<size_t>(extent.y), -1));
 	assignRegions();
@@ -133,94 +222,9 @@ void Board::Layout::findEdges() {
 	}
 
 	for (const auto &pair : foundEdges) {
-		mEdges.push_back(pair);
+		mEdges[pair.first].push_back(pair.second);
+		mEdges[pair.second].push_back(pair.first);
 	}
-}
-
-bool Board::move(const Point &point, int player) {
-	if (point.x < 0) return false;
-	if (point.y < 0) return false;
-	if (point.x >= mLayout.mExtent.x) return false;
-	if (point.y >= mLayout.mExtent.y) return false;
-	int index = mLayout.mIndices[point.x][point.y];
-	return move(index, player);
-}
-
-bool Board::move(int index, int player) {
-	mLastMove.clear();
-
-	if (!fillSlice(index, player)) {
-		return false;
-	}
-	mRegions[index].owner = player;
-
-	//Explode them in the order they are added so we don't recurse
-	for (auto it = mExplodeRegions.begin(); it != mExplodeRegions.end(); ) {
-		//Remove from exploded region
-		Region &region = mRegions[*it];
-		region.fill -= mLayout.getRegionMax(region.index);
-		//And fill each neighbor with one (optionally exploding those too)
-		for (auto &neighborIndex : mLayout.getRegionNeighbors(region.index)) {
-			//We control this now
-			mRegions[neighborIndex].owner = player;
-			if (!fillSlice(neighborIndex, player)) {
-				return false;
-			}
-		}
-		//Advance
-		it = mExplodeRegions.erase(it);
-
-		//Has someone won?
-		int winner;
-		if (getWinner(winner)) {
-			return true;
-		}
-
-		//Keep going!
-		if (region.fill > mLayout.getRegionMax(region.index)) {
-			//Split!
-			mExplodeRegions.push_back(region.index);
-		}
-	}
-	return true;
-}
-
-bool Board::fillSlice(int index, int player) {
-	Region &region = mRegions[index];
-	if (region.owner != player && region.owner != -1) {
-		return false;
-	}
-	region.fill ++;
-	if (region.fill > mLayout.getRegionMax(region.index) &&
-	    std::find(mExplodeRegions.begin(), mExplodeRegions.end(), region.index) == mExplodeRegions.end()) {
-		//Split!
-		mExplodeRegions.push_back(region.index);
-	}
-	mLastMove.push_back(index);
-	return true;
-}
-
-bool Board::getWinner(int &winner) const {
-	//See if this wins us the game
-	winner = -1;
-	bool winning = false;
-	for (const auto &copyRegion : mRegions) {
-		//Not everything is covered
-		if (copyRegion.owner == -1) {
-			return false;
-		}
-		if (winner == -1) {
-			winner = copyRegion.owner;
-			winning = true;
-		}
-		//Nope, so stop looking
-		if (copyRegion.owner != winner) {
-			winning = false;
-			break;
-		}
-	}
-
-	return winning;
 }
 
 void Board::Layout::getRegionPoints(int index, std::vector<Point> &points) const {
@@ -239,4 +243,12 @@ const std::vector<int> &Board::Layout::getRegionNeighbors(int index) const {
 
 int Board::Layout::getRegionMax(int index) const {
 	return (int)mNeighbors[index].size();
+}
+
+bool Board::Layout::isEdge(const Point &a, const Point &b) const {
+	auto it = mEdges.find(a);
+	if (it == mEdges.end()) {
+		return false;
+	}
+	return std::find(it->second.cbegin(), it->second.cend(), b) == it->second.cend();
 }

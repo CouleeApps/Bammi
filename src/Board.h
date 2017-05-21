@@ -8,6 +8,8 @@
 #include <vector>
 #include <set>
 #include <deque>
+#include <unordered_map>
+#include <map>
 
 struct Point {
 	int x;
@@ -39,13 +41,10 @@ class Board {
 public:
 	class Layout {
 		friend class Board;
-		friend class AI;
-		friend class CursesScreen;
-		friend class CoutScreen;
 
 		std::vector<std::vector<int>> mIndices;
 		std::vector<std::vector<int>> mNeighbors;
-		std::vector<std::pair<Point, Point>> mEdges;
+		std::map<Point, std::vector<Point>> mEdges;
 		Point mExtent;
 		int mRegionCount;
 
@@ -60,6 +59,7 @@ public:
 		void getRegionPoints(int index, std::vector<Point> &points) const;
 		const std::vector<int> &getRegionNeighbors(int index) const;
 		int getRegionMax(int index) const;
+		bool isEdge(const Point &a, const Point &b) const;
 	};
 
 private:
@@ -79,6 +79,8 @@ public:
 	void getRegionPoints(int index, std::vector<Point> &points) const { mLayout.getRegionPoints(index, points); }
 	const std::vector<int> &getRegionNeighbors(int index) const { return mLayout.getRegionNeighbors(index); }
 	int getRegionMax(int index) const { return mLayout.getRegionMax(index); }
+
+	bool isEdge(const Point &a, const Point &b) const { return mLayout.isEdge(a, b); }
 
 	bool move(const Point &point, int player);
 	bool move(int index, int player);

@@ -48,10 +48,10 @@ void CursesScreen::print(const Board &board) const {
 		};
 		for (int pass = TopBorder; pass < MaxPasses; pass++) {
 			for (int x = 0; x < board.getExtent().x + 1; x++) {
-				bool topEdge = std::find(board.mLayout.mEdges.begin(), board.mLayout.mEdges.end(), std::pair<Point, Point>{Point(x, y - 1), Point(x, y)}) != board.mLayout.mEdges.end();
-				bool leftEdge = std::find(board.mLayout.mEdges.begin(), board.mLayout.mEdges.end(), std::pair<Point, Point>{Point(x - 1, y), Point(x, y)}) != board.mLayout.mEdges.end();
-				bool leftTopEdge = std::find(board.mLayout.mEdges.begin(), board.mLayout.mEdges.end(), std::pair<Point, Point>{Point(x - 1, y - 1), Point(x - 1, y)}) != board.mLayout.mEdges.end();
-				bool topLeftEdge = std::find(board.mLayout.mEdges.begin(), board.mLayout.mEdges.end(), std::pair<Point, Point>{Point(x - 1, y - 1), Point(x, y - 1)}) != board.mLayout.mEdges.end();
+				bool topEdge     = board.isEdge({x, y - 1},     {x, y});
+				bool leftEdge    = board.isEdge({x - 1, y},     {x, y});
+				bool leftTopEdge = board.isEdge({x - 1, y - 1}, {x - 1, y});
+				bool topLeftEdge = board.isEdge({x - 1, y - 1}, {x, y - 1});
 				if (pass == TopBorder) {
 					//Top left corner
 					move(y * 2, x * 4);
