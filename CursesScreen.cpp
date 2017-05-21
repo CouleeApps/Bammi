@@ -115,7 +115,6 @@ void CursesScreen::print(const Board &board) const {
 								color = COLOR_PAIR(2);
 								break;
 							default:
-								color = COLOR_PAIR(0);
 								break;
 						}
 						bool moved = std::find(board.lastMove.begin(), board.lastMove.end(), board.indices[x][y]) != board.lastMove.end();

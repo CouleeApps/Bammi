@@ -191,7 +191,7 @@ float AI::getMoveWeight(int move) {
 	//    - If any surrounding other player tiles are also full then very valuable
 	// - If the other player can claim this tile on the next move, it's less valuable
 
-	float weight = 0.f;
+	float weight;
 	const Region &region = board->regions[move];
 	if (region.fill == region.size()) {
 		int movedClaimed = 0;
