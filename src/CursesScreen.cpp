@@ -33,6 +33,8 @@ CursesScreen::CursesScreen() {
 		init_pair(0, COLOR_BLACK, COLOR_BLACK);
 		init_pair(1, COLOR_BLACK, COLOR_BLUE);
 		init_pair(2, COLOR_BLACK, COLOR_RED);
+		init_pair(3, COLOR_BLUE,  COLOR_BLACK);
+		init_pair(4, COLOR_RED,   COLOR_BLACK);
 	}
 }
 
@@ -102,37 +104,28 @@ void CursesScreen::print(const Board &board) const {
 					//Center number
 					if (x < board.getExtent().x && y < board.getExtent().y) {
 						auto color = COLOR_PAIR(0);
+						bool moved = board.isLastMove({x, y});
 						switch (board.getRegion({x, y}).owner) {
 							case 0:
-								color = COLOR_PAIR(1);
+								color = (moved ? COLOR_PAIR(1) : COLOR_PAIR(3));
 								break;
 							case 1:
-								color = COLOR_PAIR(2);
+								color = (moved ? COLOR_PAIR(2) : COLOR_PAIR(4));
 								break;
 							default:
 								break;
 						}
-						bool moved = board.isLastMove({x, y});
 
-						if (moved) {
-							attrset(color);
-						} else {
-							attrset(COLOR_PAIR(0));
-						}
-						mvaddch(y * 2 + 1, x * 4 + 1, ' ');
 						attrset(color);
-						char num[3];
-						snprintf(num, 3, "%d", board.getRegion({x, y}).fill);
-						mvaddch(y * 2 + 1, x * 4 + 2, num[0]);
-						if (moved) {
-							attrset(color);
+						char fill[3], max[3];
+						snprintf(fill, 3, "%X", board.getRegion({x, y}).fill);
+						snprintf(max, 3, "%X", board.getRegionMax(board.getIndex({x, y})));
+						if (fill[1]) {
+							//TODO
 						} else {
-							attrset(COLOR_PAIR(0));
-						}
-						if (num[1]) {
-							mvaddch(y * 2 + 1, x * 4 + 3, num[1]);
-						} else {
-							mvaddch(y * 2 + 1, x * 4 + 3, ' ');
+							mvaddch(y * 2 + 1, x * 4 + 1, fill[0]);
+							mvaddch(y * 2 + 1, x * 4 + 2, '/');
+							mvaddch(y * 2 + 1, x * 4 + 3, max[0]);
 						}
 						attrset(COLOR_PAIR(0));
 					}
