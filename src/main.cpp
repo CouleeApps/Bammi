@@ -7,6 +7,11 @@
 #include "AI.h"
 #include "Screen.h"
 
+enum {
+	PLAYER_HUMAN = 0,
+	PLAYER_AI = 1
+};
+
 int main() {
 	//Get something we can display on
 	Screen *screen = Screen::getScreen();
@@ -14,13 +19,13 @@ int main() {
 	screen->getBoardSize(boardSize);
 
 	//Initial state
-	int winner = 0;
+	int winner;
 	Board::Layout layout(boardSize);
-	Board b(layout);
-	screen->print(b);
+	Board board(layout);
+	screen->print(board);
 
 	//Load AI
-	AI ai(b, 1);
+	AI ai(board, PLAYER_AI);
 
 	//Main play loop
 	while (true) {
@@ -30,14 +35,14 @@ int main() {
 			if (!screen->getMove(p)) {
 				break;
 			}
-			if (!b.move(p, 0)) {
+			if (!board.move(p, PLAYER_HUMAN)) {
 				continue;
 			}
-			if (b.getWinner(winner)) {
+			if (board.getWinner(winner)) {
 				break;
 			}
 			screen->clear();
-			screen->print(b);
+			screen->print(board);
 		}
 		//AI player
 		{
@@ -47,20 +52,20 @@ int main() {
 				break;
 			}
 			screen->delay(300);
-			if (!b.move(aiMove, 1)) {
+			if (!board.move(aiMove, PLAYER_AI)) {
 				std::cout << "No, AI" << std::endl;
 				break;
 			}
-			if (b.getWinner(winner)) {
+			if (board.getWinner(winner)) {
 				break;
 			}
-			screen->print(b);
+			screen->print(board);
 		}
 	}
 
 	//Ended the game, print final state
-	screen->print(b);
-	if (winner == 0) {
+	screen->print(board);
+	if (winner == PLAYER_HUMAN) {
 		screen->printAt("You win!", {0, boardSize.y * 2 + 2});
 	} else {
 		screen->printAt("You lose!", {0, boardSize.y * 2 + 2});

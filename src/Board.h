@@ -26,11 +26,13 @@ struct Point {
 };
 
 struct Region {
+	enum { UNOWNED = -1 };
+
 	int index;
 	int fill;
 	int owner;
 
-	Region(int index) : index(index), fill(0), owner(-1) {}
+	Region(int index) : index(index), fill(0), owner(Region::UNOWNED) {}
 };
 
 class Board {
@@ -41,6 +43,8 @@ public:
 	 * once (in the constructor) and never changed afterwards.
 	 */
 	class Layout {
+		enum { UNASSIGNED = -1 };
+
 		std::vector<std::vector<int>> mIndices;
 		std::vector<std::vector<int>> mNeighbors;
 		std::map<Point, std::vector<Point>> mEdges;

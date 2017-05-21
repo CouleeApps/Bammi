@@ -61,7 +61,7 @@ bool Board::move(int index, int player) {
 
 bool Board::fillSlice(int index, int player) {
 	Region &region = mRegions[index];
-	if (region.owner != player && region.owner != -1) {
+	if (region.owner != player && region.owner != Region::UNOWNED) {
 		return false;
 	}
 	region.fill ++;
@@ -80,7 +80,7 @@ bool Board::getWinner(int &winner) const {
 	bool winning = false;
 	for (const auto &copyRegion : mRegions) {
 		//Not everything is covered
-		if (copyRegion.owner == -1) {
+		if (copyRegion.owner == Region::UNOWNED) {
 			return false;
 		}
 		if (winner == -1) {
@@ -142,7 +142,7 @@ bool Board::isEdge(const Point &a, const Point &b) const {
 
 
 Board::Layout::Layout(const Point &extent) : mExtent(extent) {
-	mIndices = std::vector<std::vector<int>>(static_cast<size_t>(extent.x), std::vector<int>(static_cast<size_t>(extent.y), -1));
+	mIndices = std::vector<std::vector<int>>(static_cast<size_t>(extent.x), std::vector<int>(static_cast<size_t>(extent.y), UNASSIGNED));
 	assignRegions();
 	findNeighbors();
 	findEdges();
@@ -155,7 +155,7 @@ bool Board::Layout::randomEmptyCell(Point &point) {
 		auto &col = mIndices[x];
 		for (int y = 0; y < col.size(); y ++) {
 			auto &cell = col[y];
-			if (cell == -1) {
+			if (cell == UNASSIGNED) {
 				emptyPoints.push_back(Point(x, y));
 			}
 		}
@@ -193,10 +193,10 @@ bool Board::Layout::newRegion(int index) {
 	while (bdist(rd)) {
 		std::vector<Point> emptyPoints;
 		//See which points we can spread to
-		if (next.x > 0              && mIndices[next.x - 1][next.y] == -1) emptyPoints.push_back(Point(next.x - 1, next.y));
-		if (next.x < (mExtent.x - 1) && mIndices[next.x + 1][next.y] == -1) emptyPoints.push_back(Point(next.x + 1, next.y));
-		if (next.y > 0              && mIndices[next.x][next.y - 1] == -1) emptyPoints.push_back(Point(next.x, next.y - 1));
-		if (next.y < (mExtent.y - 1) && mIndices[next.x][next.y + 1] == -1) emptyPoints.push_back(Point(next.x, next.y + 1));
+		if (next.x > 0               && mIndices[next.x - 1][next.y] == UNASSIGNED) emptyPoints.push_back(Point(next.x - 1, next.y));
+		if (next.x < (mExtent.x - 1) && mIndices[next.x + 1][next.y] == UNASSIGNED) emptyPoints.push_back(Point(next.x + 1, next.y));
+		if (next.y > 0               && mIndices[next.x][next.y - 1] == UNASSIGNED) emptyPoints.push_back(Point(next.x, next.y - 1));
+		if (next.y < (mExtent.y - 1) && mIndices[next.x][next.y + 1] == UNASSIGNED) emptyPoints.push_back(Point(next.x, next.y + 1));
 		//Nothing? How sad.
 		if (emptyPoints.size() == 0) break;
 

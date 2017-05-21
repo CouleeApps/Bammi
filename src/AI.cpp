@@ -25,7 +25,7 @@ bool AI::getMove(int &move) {
 	std::vector<std::pair<int, float>> moveList;
 	for (const auto &region : mBoard.getRegions()) {
 		//Can't move here
-		if (region.owner != mPlayer && region.owner != -1) {
+		if (region.owner != mPlayer && region.owner != Region::UNOWNED) {
 			continue;
 		}
 
@@ -126,7 +126,7 @@ float AI::getMoveWeight(int move) {
 				weight += 0.5f;
 			}
 		}
-	} else if (region.owner == -1) {
+	} else if (region.owner == Region::UNOWNED) {
 		//Unclaimed tile, it's worth more if it has fewer neighbors.
 		// It's also worth more if its neighbors are not ours (uncertain how helpful this
 		// strategy is but it makes nicer patterns)
@@ -138,7 +138,7 @@ float AI::getMoveWeight(int move) {
 		//How many neighbors are controlled by our opponent
 		int opposing = 0;
 		for (const auto &neighbor : mBoard.getRegionNeighbors(region.index)) {
-			if (mBoard.getRegion(neighbor).owner != mPlayer && mBoard.getRegion(neighbor).owner != -1) {
+			if (mBoard.getRegion(neighbor).owner != mPlayer && mBoard.getRegion(neighbor).owner != Region::UNOWNED) {
 				opposing ++;
 			}
 		}
