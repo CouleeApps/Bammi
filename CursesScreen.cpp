@@ -34,6 +34,10 @@ CursesScreen::CursesScreen() {
 	}
 }
 
+CursesScreen::~CursesScreen() {
+	endwin();
+}
+
 void CursesScreen::print(const Board &board) const {
 	for (int y = 0; y < board.extent.y + 1; y++) {
 		enum Pass : int {

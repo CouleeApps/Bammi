@@ -15,8 +15,9 @@ class AI {
 
 	void updateMyRegions();
 	bool basicMove(int maxSize, int &move);
-	bool obviousExplode(int &move);
+	bool obviousExplodeMove(int &move);
 	bool winningMove(int &move);
+	bool randomMove(int &move);
 
 public:
 	AI(Board *board, int player) : board(board), player(player) {}

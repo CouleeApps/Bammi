@@ -3,19 +3,12 @@
 #include "Board.h"
 #include "AI.h"
 #include "Screen.h"
-#include "CursesScreen.h"
-#include "CoutScreen.h"
 
 int main() {
-	Board b(Point(6, 6));
+	Board b(Point(7, 7));
 
 	//Get something we can display on
-	Screen *screen;
-	try {
-		screen = new CursesScreen();
-	} catch (int) {
-		screen = new CoutScreen();
-	}
+	Screen *screen = Screen::getScreen();
 	screen->print(b);
 
 	AI ai(&b, 1);
@@ -34,7 +27,7 @@ int main() {
 			break;
 		}
 		screen->print(b);
-//		std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::this_thread::sleep_for(std::chrono::milliseconds(300));
 		int aiMove;
 		if (!ai.getMove(aiMove)) {
 			std::cout << "RIP AI" << std::endl;
@@ -52,6 +45,7 @@ int main() {
 
 	screen->print(b);
 	std::cout << "Winner is " << winner << std::endl;
+	std::this_thread::sleep_for(std::chrono::seconds(3));
 
 	delete screen;
 }

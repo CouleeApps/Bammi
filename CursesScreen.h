@@ -9,7 +9,7 @@
 
 class CursesScreen : public Screen {
 public:
-	~CursesScreen() {};
+	~CursesScreen();
 	CursesScreen();
 	void print(const Board &board) const override;
 	bool getMove(Point &move) const override;

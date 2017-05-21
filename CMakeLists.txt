@@ -4,7 +4,7 @@ project(Bammi)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-Wall")
 
-set(SOURCE_FILES main.cpp Board.cpp Board.h AI.cpp AI.h CursesScreen.cpp CursesScreen.h CoutScreen.cpp CoutScreen.h)
+set(SOURCE_FILES main.cpp Board.cpp Board.h AI.cpp AI.h CursesScreen.cpp CursesScreen.h CoutScreen.cpp CoutScreen.h Screen.cpp)
 add_executable(Bammi ${SOURCE_FILES})
 
 target_link_libraries(Bammi ncurses)

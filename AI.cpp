@@ -2,6 +2,7 @@
 // Created by Glenn Smith on 5/7/17.
 //
 
+#include <random>
 #include "AI.h"
 
 void AI::updateMyRegions() {
@@ -17,6 +18,28 @@ void AI::updateMyRegions() {
 		}
 		return board->regions[a].points.size() > board->regions[b].points.size();
 	});
+}
+
+bool AI::getMove(int &move) {
+	updateMyRegions();
+
+	//If our next move could win us the game, do that of course
+	if (winningMove(move)) {
+		return true;
+	}
+	//If we can chain explosions, hey why not
+	if (obviousExplodeMove(move)) {
+		return true;
+	}
+	//Try to fill up empty spaces so we have more
+	if (basicMove(5, move)) {
+		return true;
+	}
+
+	//Fill up smaller regions
+
+	//Can't find anything to do??
+	return randomMove(move);
 }
 
 bool AI::basicMove(int maxSize, int &move) {
@@ -45,29 +68,7 @@ bool AI::basicMove(int maxSize, int &move) {
 	return true;
 }
 
-bool AI::getMove(int &move) {
-	updateMyRegions();
-
-	//If our next move could win us the game, do that of course
-	if (winningMove(move)) {
-		return true;
-	}
-	//If we can chain explosions, hey why not
-	if (obviousExplode(move)) {
-		return true;
-	}
-	//Try to fill up empty spaces so we have more
-	if (basicMove(5, move)) {
-		return true;
-	}
-
-	//Fill up smaller regions
-
-
-	return true;
-}
-
-bool AI::obviousExplode(int &move) {
+bool AI::obviousExplodeMove(int &move) {
 	//Check if any regions bounding one of our full regions is also full
 	// If so, explode our region for super chain reaction party
 	for (auto region : myRegions) {
@@ -103,4 +104,17 @@ bool AI::winningMove(int &move) {
 	}
 
 	return false;
+}
+
+bool AI::randomMove(int &move) {
+	if (myRegions.size() == 0) {
+		return false;
+	}
+
+	//Can't find any other heuristics to use so pick a random place to go
+	std::random_device rd;
+	std::uniform_int_distribution<int> dist(0, static_cast<int>(myRegions.size() - 1));
+	move = myRegions[dist(rd)];
+
+	return true;
 }
