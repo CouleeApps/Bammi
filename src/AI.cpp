@@ -149,7 +149,14 @@ float AI::getMoveWeight(int move) {
 	} else {
 		//Our tile but nothing special about it. Try to fill it up if it's close to full
 		weight = (float)region.fill / (float)max;
+		//TODO: Less important if we're not next to any of the opponent's tiles
+		//TODO: Much less important if we're next to a full tile of ours
+		//TODO: Better prediction?
 	}
+
+	//TODO: This is entirely stateless. Theoretically we could call this again as the
+	// other player and see what their best move would be. Then minimizing the weight of
+	// their best move would be our best move. Uncertain how successful that would be.
 
 	//If moving here would let the other player claim it on the next turn, less value
 	{
