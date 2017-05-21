@@ -72,7 +72,12 @@ void CoutScreen::print(const Board &board) const {
 								std::cout << (char)('A' + r.owner);
 								break;
 						}
-						std::cout << std::setw(2) << std::left << r.fill;
+						bool moved = std::find(board.lastMove.begin(), board.lastMove.end(), board.indices[x][y]) != board.lastMove.end();
+						if (moved) {
+							std::cout << '*' << (r.fill % 10);
+						} else {
+							std::cout << std::setw(2) << std::right << r.fill;
+						}
 					} else {
 						std::cout << "  ";
 					}

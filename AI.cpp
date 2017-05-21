@@ -42,7 +42,7 @@ bool AI::getMove(int &move) {
 	//Fill up smaller regions
 
 	//Can't find anything to do??
-	return weightedRandomMove(move);
+	return highestWeightedMove(move);
 }
 
 bool AI::basicMove(int maxSize, int &move) {
@@ -109,7 +109,7 @@ bool AI::winningMove(int &move) {
 	return false;
 }
 
-bool AI::weightedRandomMove(int &move) {
+bool AI::highestWeightedMove(int &move) {
 	if (myRegions.size() == 0) {
 		return false;
 	}
@@ -126,7 +126,11 @@ bool AI::weightedRandomMove(int &move) {
 		std::stringstream ss;
 		ss << '(' << board->regions[region].points[0].x << ", " << board->regions[region].points[0].y << ')';
 		ss << ' ' << weight;
-		Screen::getScreen()->printAt(Point{board->extent.x * 4 + 2, region}, ss.str());
+		Screen::getScreen()->printAt({board->extent.x * 4 + 2, region}, ss.str());
+	}
+	if (weightTotal == 0.0f) {
+		//Oh shit
+		Screen::getScreen()->printAt({board->extent.x * 4 + 2, 0}, "Shit");
 	}
 	//Sort highest to lowest
 	std::sort(moveList.begin(), moveList.end(), [](const auto &a, const auto &b)->bool{
@@ -165,7 +169,7 @@ float AI::getMoveWeight(int move) {
 		//See all the moves the other player could make and if any would lose us the game
 		for (const auto &region : board->regions) {
 			//Ignore us as that would mean we move twice
-			if (region.owner != player) {
+			if (region.owner == player) {
 				continue;
 			}
 			Board twoAdvance(oneAdvance);
@@ -203,9 +207,9 @@ float AI::getMoveWeight(int move) {
 			}
 		}
 
-		weight = 0.5f + ((float)(movedClaimed - currentClaimed) / (float)board->regions.size());
+		weight = (float)(movedClaimed - currentClaimed) / (float)board->regions.size();
 	} else {
-		weight = 1.0f + ((float)region.fill / (float)region.size());
+		weight = (float)region.fill / (float)region.size();
 	}
 
 	//If moving here would let the other player claim it on the next turn, less value

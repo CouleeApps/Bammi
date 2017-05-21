@@ -125,6 +125,8 @@ bool Board::move(const Point &point, int player) {
 }
 
 bool Board::move(int index, int player) {
+	lastMove.clear();
+
 	if (!fillSlice(index, player)) {
 		return false;
 	}
@@ -172,6 +174,7 @@ bool Board::fillSlice(int index, int player) {
 		//Split!
 		explodeRegions.push_back(region.index);
 	}
+	lastMove.push_back(index);
 	return true;
 }
 

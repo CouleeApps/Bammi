@@ -4,7 +4,7 @@
 #include "Screen.h"
 
 int main() {
-	Board b(Point(5, 5));
+	Board b(Point(3, 3));
 
 	//Get something we can display on
 	Screen *screen = Screen::getScreen();

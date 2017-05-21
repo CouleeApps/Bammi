@@ -43,6 +43,8 @@ class Board {
 	std::deque<int> explodeRegions;
 	Point extent;
 
+	std::vector<int> lastMove;
+
 	bool randomEmptyCell(Point &point);
 	bool newRegion(std::vector<Point> &regionPoints, int index);
 	void assignRegions();
@@ -55,9 +57,6 @@ public:
 
 	int &operator[](const Point &p) { return indices[p.x][p.y]; }
 	const int &operator[](const Point &p) const { return indices[p.x][p.y]; }
-
-	Region &getRegion(int index) { return regions[index]; }
-	const Region &getRegion(int index) const { return regions[index]; }
 
 	bool move(const Point &point, int player);
 	bool move(int index, int player);

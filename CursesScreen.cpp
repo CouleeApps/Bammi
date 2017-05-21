@@ -106,21 +106,35 @@ void CursesScreen::print(const Board &board) const {
 						              board.indices[x][y]) != board.explodeRegions.end()) {
 							mvaddch(y * 2 + 1, x * 4 + 1, '*');
 						}
+						auto color = COLOR_PAIR(0);
 						switch (board.regions[board.indices[x][y]].owner) {
 							case 0:
-								attrset(COLOR_PAIR(1));
+								color = COLOR_PAIR(1);
 								break;
 							case 1:
-								attrset(COLOR_PAIR(2));
+								color = COLOR_PAIR(2);
 								break;
 							default:
-								attrset(COLOR_PAIR(0));
+								color = COLOR_PAIR(0);
 								break;
 						}
+						bool moved = std::find(board.lastMove.begin(), board.lastMove.end(), board.indices[x][y]) != board.lastMove.end();
+
+						if (moved) {
+							attrset(color);
+						} else {
+							attrset(COLOR_PAIR(0));
+						}
 						mvaddch(y * 2 + 1, x * 4 + 1, ' ');
+						attrset(color);
 						char num[3];
 						snprintf(num, 3, "%d", board.regions[board.indices[x][y]].fill);
 						mvaddch(y * 2 + 1, x * 4 + 2, num[0]);
+						if (moved) {
+							attrset(color);
+						} else {
+							attrset(COLOR_PAIR(0));
+						}
 						if (num[1]) {
 							mvaddch(y * 2 + 1, x * 4 + 3, num[1]);
 						} else {

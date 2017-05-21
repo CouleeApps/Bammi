@@ -17,7 +17,7 @@ class AI {
 	bool basicMove(int maxSize, int &move);
 	bool obviousExplodeMove(int &move);
 	bool winningMove(int &move);
-	bool weightedRandomMove(int &move);
+	bool highestWeightedMove(int &move);
 
 	float getMoveWeight(int move);
 
