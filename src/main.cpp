@@ -20,7 +20,7 @@ int main() {
 	screen->print(b);
 
 	//Load AI
-	AI ai(&b, 1);
+	AI ai(b, 1);
 
 	//Main play loop
 	while (true) {

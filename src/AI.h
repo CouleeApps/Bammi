@@ -9,7 +9,7 @@
 #include "Board.h"
 
 class AI {
-	Board *mBoard;
+	const Board &mBoard;
 	std::vector<int> mRegions;
 	int mPlayer;
 
@@ -20,7 +20,7 @@ class AI {
 	int getPlayerClaimedCount(const Board &input, int move, int player);
 
 public:
-	AI(Board *board, int player) : mBoard(board), mPlayer(player) {}
+	AI(const Board &board, int player) : mBoard(board), mPlayer(player) {}
 	bool getMove(int &move);
 };
 
