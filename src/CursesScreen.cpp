@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <curses.h>
 #include <thread>
+#include <csignal>
 
 void finish(int) {
 	endwin();

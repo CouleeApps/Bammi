@@ -4,6 +4,7 @@
 
 #include "Board.h"
 #include <random>
+#include <algorithm> //std::find
 
 Board::Board(const Layout &layout) : mLayout(layout) {
 	for (int i = 0; i < mLayout.getRegionCount(); i ++) {
