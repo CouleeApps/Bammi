@@ -31,7 +31,7 @@ int main() {
 			std::cout << "RIP AI" << std::endl;
 			break;
 		}
-		screen->delay(100);
+		screen->delay(300);
 		if (!b.move(aiMove, 1)) {
 			std::cout << "No, AI" << std::endl;
 			break;

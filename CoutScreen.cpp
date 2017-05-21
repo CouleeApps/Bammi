@@ -5,7 +5,6 @@
 #include "CoutScreen.h"
 #include <iostream>
 #include <iomanip>
-#include <curses.h>
 
 CoutScreen::CoutScreen() {
 }
@@ -35,7 +34,7 @@ void CoutScreen::print(const Board &board) const {
 							std::cout << "┳";
 						} else if (topLeftEdge && leftTopEdge) {
 							std::cout << "┻";
-						} else if (topLeftEdge && topEdge) {
+						} else if (topLeftEdge) {
 							std::cout << "┗";
 						} else if (leftEdge) {
 							std::cout << "┏";
