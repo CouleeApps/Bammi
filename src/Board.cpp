@@ -35,7 +35,8 @@ bool Board::move(int index, int player) {
 		Region &region = mRegions[*it];
 		region.fill -= getRegionMax(region.index);
 		//And fill each neighbor with one (optionally exploding those too)
-		for (auto &neighborIndex : getRegionNeighbors(region.index)) {
+		const auto &neighbors = getRegionNeighbors(region.index);
+		for (auto &neighborIndex : neighbors) {
 			//We control this now
 			mRegions[neighborIndex].owner = player;
 			if (!fillSlice(neighborIndex, player)) {

@@ -11,7 +11,8 @@
 
 void AI::updateMyRegions() {
 	mRegions.clear();
-	for (const auto &region : mBoard.getRegions()) {
+	const auto &regions = mBoard.getRegions();
+	for (const auto &region : regions) {
 		if (region.owner == mPlayer) {
 			mRegions.push_back(region.index);
 		}
@@ -24,7 +25,8 @@ bool AI::getMove(int &move) {
 	//Get a list of all the moves we can make and weight them
 	float weightTotal = 0.0f;
 	std::vector<std::pair<int, float>> moveList;
-	for (const auto &region : mBoard.getRegions()) {
+	const auto &regions = mBoard.getRegions();
+	for (const auto &region : regions) {
 		//Can't move here
 		if (region.owner != mPlayer && region.owner != Region::UNOWNED) {
 			continue;
@@ -71,7 +73,8 @@ bool AI::isLosingMove(int move) {
 	oneAdvance.move(move, mPlayer);
 
 	//See all the moves the other player could make and if any would lose us the game
-	for (const auto &region : mBoard.getRegions()) {
+	const auto &regions = mBoard.getRegions();
+	for (const auto &region : regions) {
 		//Ignore us as that would mean we move twice
 		if (region.owner == mPlayer) {
 			continue;
@@ -117,7 +120,8 @@ float AI::getMoveWeight(int move) {
 
 		weight = (float)(movedClaimed - currentClaimed) / (float)max;
 		//Also take into account the number of surrounding full regions they have
-		for (const auto &neighbor : mBoard.getRegionNeighbors(region.index)) {
+		const auto &neighbors = mBoard.getRegionNeighbors(region.index);
+		for (const auto &neighbor : neighbors) {
 			const auto &other = mBoard.getRegion(neighbor);
 			if (other.owner == mPlayer) {
 				continue;
@@ -138,7 +142,8 @@ float AI::getMoveWeight(int move) {
 
 		//How many neighbors are controlled by our opponent
 		int opposing = 0;
-		for (const auto &neighbor : mBoard.getRegionNeighbors(region.index)) {
+		const auto &neighbors = mBoard.getRegionNeighbors(region.index);
+		for (const auto &neighbor : neighbors) {
 			if (mBoard.getRegion(neighbor).owner != mPlayer && mBoard.getRegion(neighbor).owner != Region::UNOWNED) {
 				opposing ++;
 			}
@@ -167,7 +172,8 @@ float AI::getMoveWeight(int move) {
 		Board oneAdvance(mBoard);
 		oneAdvance.move(move, mPlayer);
 		//See if they would be able to claim it
-		for (const auto &testRegion : oneAdvance.getRegions()) {
+		const auto &oneRegions = oneAdvance.getRegions();
+		for (const auto &testRegion : oneRegions) {
 			//Can't move twice in a row
 			if (testRegion.owner == mPlayer) {
 				continue;
@@ -183,7 +189,8 @@ float AI::getMoveWeight(int move) {
 
 			//See how many our opponent could own after this move
 			int movedOpponentClaimed = 0;
-			for (const auto &twoTestRegion : twoAdvance.getRegions()) {
+			const auto &twoRegions = twoAdvance.getRegions();
+			for (const auto &twoTestRegion : twoRegions) {
 				if (twoTestRegion.owner != mPlayer) {
 					movedOpponentClaimed ++;
 				}
@@ -208,7 +215,8 @@ int AI::getPlayerClaimedCount(const Board &input, int move, int player) {
 	//Try the move and see what we get
 	Board testBoard(input);
 	testBoard.move(move, player);
-	for (const auto &testRegion : testBoard.getRegions()) {
+	const auto &testRegions = testBoard.getRegions();
+	for (const auto &testRegion : testRegions) {
 		if (testRegion.owner == player) {
 			movedClaimed ++;
 		}
