@@ -15,7 +15,8 @@ int main() {
 
 	//Initial state
 	int winner = 0;
-	Board b(boardSize);
+	Board::Layout layout(boardSize);
+	Board b(layout);
 	screen->print(b);
 
 	//Load AI

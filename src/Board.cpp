@@ -5,14 +5,20 @@
 #include "Board.h"
 #include <random>
 
-Board::Board(const Point &extent) : mExtent(extent) {
+Board::Board(Layout &layout) : mLayout(layout) {
+	for (int i = 0; i < mLayout.mRegionCount; i ++) {
+		mRegions.push_back(Region(i));
+	}
+}
+
+Board::Layout::Layout(const Point &extent) : mExtent(extent) {
 	mIndices = std::vector<std::vector<int>>(static_cast<size_t>(extent.x), std::vector<int>(static_cast<size_t>(extent.y), -1));
 	assignRegions();
 	findNeighbors();
 	findEdges();
 }
 
-bool Board::randomEmptyCell(Point &point) {
+bool Board::Layout::randomEmptyCell(Point &point) {
 	//Get a list of all the empties
 	std::vector<Point> emptyPoints;
 	for (int x = 0; x < mIndices.size(); x ++) {
@@ -37,7 +43,7 @@ bool Board::randomEmptyCell(Point &point) {
 	return true;
 }
 
-bool Board::newRegion(std::vector<Point> &regionPoints, int index) {
+bool Board::Layout::newRegion(std::vector<Point> &regionPoints, int index) {
 	Point start;
 	//Make sure we have somewhere to start
 	if (!randomEmptyCell(start)) {
@@ -73,30 +79,28 @@ bool Board::newRegion(std::vector<Point> &regionPoints, int index) {
 	return true;
 }
 
-void Board::assignRegions() {
+void Board::Layout::assignRegions() {
 	//Make new regions until we run out of points
 	std::vector<Point> regionPoints;
 	for (int index = 0; newRegion(regionPoints, index); index ++) {
-		mRegions.push_back(Region(index));
-		//So we have an empty vector for the next one
-		regionPoints.clear();
+		mRegionCount ++;
 	}
 }
 
-void Board::findNeighbors() {
-	for (auto &region : mRegions) {
+void Board::Layout::findNeighbors() {
+	for (int i = 0; i < mRegionCount; i ++) {
 		//So we don't have duplicates
 		std::set<int> neighborSet;
 
 		std::vector<Point> points;
-		getRegionPoints(region.index, points);
+		getRegionPoints(i, points);
 
 		for (const auto &point : points) {
 			//Up to four, check if they're a different region
-			if (point.x > 0              && mIndices[point.x - 1][point.y] != region.index) neighborSet.insert(mIndices[point.x - 1][point.y]);
-			if (point.x < (mExtent.x - 1) && mIndices[point.x + 1][point.y] != region.index) neighborSet.insert(mIndices[point.x + 1][point.y]);
-			if (point.y > 0              && mIndices[point.x][point.y - 1] != region.index) neighborSet.insert(mIndices[point.x][point.y - 1]);
-			if (point.y < (mExtent.y - 1) && mIndices[point.x][point.y + 1] != region.index) neighborSet.insert(mIndices[point.x][point.y + 1]);
+			if (point.x > 0              && mIndices[point.x - 1][point.y] != i) neighborSet.insert(mIndices[point.x - 1][point.y]);
+			if (point.x < (mExtent.x - 1) && mIndices[point.x + 1][point.y] != i) neighborSet.insert(mIndices[point.x + 1][point.y]);
+			if (point.y > 0              && mIndices[point.x][point.y - 1] != i) neighborSet.insert(mIndices[point.x][point.y - 1]);
+			if (point.y < (mExtent.y - 1) && mIndices[point.x][point.y + 1] != i) neighborSet.insert(mIndices[point.x][point.y + 1]);
 		}
 
 		std::vector<int> neighbors;
@@ -107,7 +111,7 @@ void Board::findNeighbors() {
 	}
 }
 
-void Board::findEdges() {
+void Board::Layout::findEdges() {
 	std::set<std::pair<Point, Point>> foundEdges;
 
 	for (int x = 0; x < mExtent.x; x ++) {
@@ -136,9 +140,9 @@ void Board::findEdges() {
 bool Board::move(const Point &point, int player) {
 	if (point.x < 0) return false;
 	if (point.y < 0) return false;
-	if (point.x >= mExtent.x) return false;
-	if (point.y >= mExtent.y) return false;
-	int index = mIndices[point.x][point.y];
+	if (point.x >= mLayout.mExtent.x) return false;
+	if (point.y >= mLayout.mExtent.y) return false;
+	int index = mLayout.mIndices[point.x][point.y];
 	return move(index, player);
 }
 
@@ -154,9 +158,9 @@ bool Board::move(int index, int player) {
 	for (auto it = mExplodeRegions.begin(); it != mExplodeRegions.end(); ) {
 		//Remove from exploded region
 		Region &region = mRegions[*it];
-		region.fill -= getRegionMax(region.index);
+		region.fill -= mLayout.getRegionMax(region.index);
 		//And fill each neighbor with one (optionally exploding those too)
-		for (auto &neighborIndex : getRegionNeighbors(region.index)) {
+		for (auto &neighborIndex : mLayout.getRegionNeighbors(region.index)) {
 			//We control this now
 			mRegions[neighborIndex].owner = player;
 			if (!fillSlice(neighborIndex, player)) {
@@ -173,7 +177,7 @@ bool Board::move(int index, int player) {
 		}
 
 		//Keep going!
-		if (region.fill > getRegionMax(region.index)) {
+		if (region.fill > mLayout.getRegionMax(region.index)) {
 			//Split!
 			mExplodeRegions.push_back(region.index);
 		}
@@ -187,7 +191,7 @@ bool Board::fillSlice(int index, int player) {
 		return false;
 	}
 	region.fill ++;
-	if (region.fill > getRegionMax(region.index) &&
+	if (region.fill > mLayout.getRegionMax(region.index) &&
 	    std::find(mExplodeRegions.begin(), mExplodeRegions.end(), region.index) == mExplodeRegions.end()) {
 		//Split!
 		mExplodeRegions.push_back(region.index);
@@ -219,7 +223,7 @@ bool Board::getWinner(int &winner) const {
 	return winning;
 }
 
-void Board::getRegionPoints(int index, std::vector<Point> &points) const {
+void Board::Layout::getRegionPoints(int index, std::vector<Point> &points) const {
 	for (int x = 0; x < mExtent.x; x ++) {
 		for (int y = 0; y < mExtent.y; y ++) {
 			if (mIndices[x][y] == index) {
@@ -229,10 +233,10 @@ void Board::getRegionPoints(int index, std::vector<Point> &points) const {
 	}
 }
 
-const std::vector<int> &Board::getRegionNeighbors(int index) const {
+const std::vector<int> &Board::Layout::getRegionNeighbors(int index) const {
 	return mNeighbors[index];
 }
 
-int Board::getRegionMax(int index) const {
+int Board::Layout::getRegionMax(int index) const {
 	return (int)mNeighbors[index].size();
 }

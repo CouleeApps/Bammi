@@ -40,11 +40,11 @@ bool AI::getMove(int &move) {
 		std::stringstream ss;
 		ss << '(' << points[0].x << ", " << points[0].y << ')';
 		ss << ' ' << weight;
-		Screen::getScreen()->printAt(ss.str(), {mBoard->mExtent.x * 4 + 2, region.index});
+		Screen::getScreen()->printAt(ss.str(), {mBoard->getExtent().x * 4 + 2, region.index});
 	}
 	if (weightTotal == 0.0f) {
 		//Oh shit
-		Screen::getScreen()->printAt("Shit", {mBoard->mExtent.x * 4 + 2, 0});
+		Screen::getScreen()->printAt("Shit", {mBoard->getExtent().x * 4 + 2, 0});
 	}
 	//Sort highest to lowest
 	std::sort(moveList.begin(), moveList.end(), [](const auto &a, const auto &b)->bool{

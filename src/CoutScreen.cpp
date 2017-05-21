@@ -10,18 +10,18 @@ CoutScreen::CoutScreen() {
 }
 
 void CoutScreen::print(const Board &board) const {
-	for (int y = 0; y < board.mExtent.y + 1; y++) {
+	for (int y = 0; y < board.getExtent().y + 1; y++) {
 		enum Pass : int {
 			TopBorder,
 			Center,
 			MaxPasses
 		};
 		for (int pass = TopBorder; pass < MaxPasses; pass++) {
-			for (int x = 0; x < board.mExtent.x + 1; x++) {
-				bool topEdge = std::find(board.mEdges.begin(), board.mEdges.end(), std::pair<Point, Point>{Point(x, y - 1), Point(x, y)}) != board.mEdges.end();
-				bool leftEdge = std::find(board.mEdges.begin(), board.mEdges.end(), std::pair<Point, Point>{Point(x - 1, y), Point(x, y)}) != board.mEdges.end();
-				bool leftTopEdge = std::find(board.mEdges.begin(), board.mEdges.end(), std::pair<Point, Point>{Point(x - 1, y - 1), Point(x - 1, y)}) != board.mEdges.end();
-				bool topLeftEdge = std::find(board.mEdges.begin(), board.mEdges.end(), std::pair<Point, Point>{Point(x - 1, y - 1), Point(x, y - 1)}) != board.mEdges.end();
+			for (int x = 0; x < board.getExtent().x + 1; x++) {
+				bool topEdge = std::find(board.mLayout.mEdges.begin(), board.mLayout.mEdges.end(), std::pair<Point, Point>{Point(x, y - 1), Point(x, y)}) != board.mLayout.mEdges.end();
+				bool leftEdge = std::find(board.mLayout.mEdges.begin(), board.mLayout.mEdges.end(), std::pair<Point, Point>{Point(x - 1, y), Point(x, y)}) != board.mLayout.mEdges.end();
+				bool leftTopEdge = std::find(board.mLayout.mEdges.begin(), board.mLayout.mEdges.end(), std::pair<Point, Point>{Point(x - 1, y - 1), Point(x - 1, y)}) != board.mLayout.mEdges.end();
+				bool topLeftEdge = std::find(board.mLayout.mEdges.begin(), board.mLayout.mEdges.end(), std::pair<Point, Point>{Point(x - 1, y - 1), Point(x, y - 1)}) != board.mLayout.mEdges.end();
 				if (pass == TopBorder) {
 					if (topEdge) {
 						if (topLeftEdge && leftEdge && leftTopEdge) {
@@ -60,8 +60,8 @@ void CoutScreen::print(const Board &board) const {
 					} else {
 						std::cout << " ";
 					}
-					if (x < board.mExtent.x && y < board.mExtent.y) {
-						const Region &r = board.mRegions[board.mIndices[x][y]];
+					if (x < board.getExtent().x && y < board.getExtent().y) {
+						const Region &r = board.mRegions[board[{x, y}]];
 						switch (r.owner) {
 							case -1:
 								std::cout << " ";
@@ -70,7 +70,7 @@ void CoutScreen::print(const Board &board) const {
 								std::cout << (char)('A' + r.owner);
 								break;
 						}
-						bool moved = std::find(board.mLastMove.begin(), board.mLastMove.end(), board.mIndices[x][y]) != board.mLastMove.end();
+						bool moved = std::find(board.mLastMove.begin(), board.mLastMove.end(), board[{x, y}]) != board.mLastMove.end();
 						if (moved) {
 							std::cout << '*' << (r.fill % 10);
 						} else {
