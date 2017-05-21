@@ -88,3 +88,7 @@ bool CoutScreen::getMove(Point &move) const {
 	std::cin >> move.x >> move.y;
 	return true;
 }
+
+void CoutScreen::printAt(const Point &position, const std::string &text) const {
+	std::cout << text << std::endl;
+}

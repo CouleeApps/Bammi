@@ -11,6 +11,7 @@ class Screen {
 public:
 	virtual ~Screen() {}
 	virtual void print(const Board &board) const = 0;
+	virtual void printAt(const Point &position, const std::string &text) const = 0;
 	virtual bool getMove(Point &move) const = 0;
 
 	static Screen *getScreen();

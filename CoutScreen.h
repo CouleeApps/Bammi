@@ -12,6 +12,7 @@ public:
 	~CoutScreen() {};
 	CoutScreen();
 	void print(const Board &board) const override;
+	void printAt(const Point &position, const std::string &text) const override;
 	bool getMove(Point &move) const override;
 };
 

@@ -8,11 +8,13 @@
 #include "CoutScreen.h"
 
 Screen *Screen::getScreen() {
-	Screen *screen;
-	try {
-		screen = new CursesScreen();
-	} catch (int) {
-		screen = new CoutScreen();
+	static Screen *screen = nullptr;
+	if (screen == nullptr) {
+		try {
+			screen = new CursesScreen();
+		} catch (int) {
+			screen = new CoutScreen();
+		}
 	}
 	return screen;
 }

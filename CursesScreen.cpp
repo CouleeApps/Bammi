@@ -150,3 +150,11 @@ bool CursesScreen::getMove(Point &move) const {
 
 	return true;
 }
+
+void CursesScreen::printAt(const Point &position, const std::string &text) const {
+	Point current(position);
+	for (const auto &ch : text) {
+		mvaddch(current.y, current.x, ch);
+		current.x ++;
+	}
+}

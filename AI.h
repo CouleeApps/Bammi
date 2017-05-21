@@ -17,7 +17,9 @@ class AI {
 	bool basicMove(int maxSize, int &move);
 	bool obviousExplodeMove(int &move);
 	bool winningMove(int &move);
-	bool randomMove(int &move);
+	bool weightedRandomMove(int &move);
+
+	float getMoveWeight(int move);
 
 public:
 	AI(Board *board, int player) : board(board), player(player) {}
