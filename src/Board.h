@@ -18,12 +18,15 @@ struct Point {
 	bool operator<(const Point &other) const {
 		return x < other.x || (x == other.x && y < other.y);
 	}
+	bool operator==(const Point &other) const {
+		return x == other.x && y == other.y;
+	}
 };
 
 struct Region {
 	std::vector<Point> points;
 	//Use a set so we don't have to worry about duplicates
-	std::set<int> neighbors;
+	std::vector<int> neighbors;
 	int max() const { return static_cast<int>(neighbors.size()); }
 	int size() const { return static_cast<int>(points.size()); }
 	int index;
@@ -39,7 +42,7 @@ class Board {
 	friend class CoutScreen;
 
 	std::vector<std::vector<int>> indices;
-	std::set<std::pair<Point, Point>> edges;
+	std::vector<std::pair<Point, Point>> edges;
 	std::vector<Region> regions;
 	std::deque<int> explodeRegions;
 	Point extent;

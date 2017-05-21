@@ -57,8 +57,6 @@ int main() {
 		}
 	}
 
-	screen->clear();
-
 	//Ended the game, print final state
 	screen->print(b);
 	if (winner == 0) {

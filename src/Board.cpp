@@ -85,33 +85,44 @@ void Board::assignRegions() {
 
 void Board::findNeighbors() {
 	for (auto &region : regions) {
+		std::set<int> neighbors;
 		for (const auto &point : region.points) {
 			//Up to four, check if they're a different region
-			if (point.x > 0              && indices[point.x - 1][point.y] != region.index) region.neighbors.insert(indices[point.x - 1][point.y]);
-			if (point.x < (extent.x - 1) && indices[point.x + 1][point.y] != region.index) region.neighbors.insert(indices[point.x + 1][point.y]);
-			if (point.y > 0              && indices[point.x][point.y - 1] != region.index) region.neighbors.insert(indices[point.x][point.y - 1]);
-			if (point.y < (extent.y - 1) && indices[point.x][point.y + 1] != region.index) region.neighbors.insert(indices[point.x][point.y + 1]);
+			if (point.x > 0              && indices[point.x - 1][point.y] != region.index) neighbors.insert(indices[point.x - 1][point.y]);
+			if (point.x < (extent.x - 1) && indices[point.x + 1][point.y] != region.index) neighbors.insert(indices[point.x + 1][point.y]);
+			if (point.y > 0              && indices[point.x][point.y - 1] != region.index) neighbors.insert(indices[point.x][point.y - 1]);
+			if (point.y < (extent.y - 1) && indices[point.x][point.y + 1] != region.index) neighbors.insert(indices[point.x][point.y + 1]);
+		}
+
+		for (const auto &neighbor : neighbors) {
+			region.neighbors.push_back(neighbor);
 		}
 	}
 }
 
 void Board::findEdges() {
+	std::set<std::pair<Point, Point>> foundEdges;
+
 	for (int x = 0; x < extent.x; x ++) {
 		for (int y = 0; y < extent.y; y ++) {
 			int at = indices[x][y];
 			//Edge of the board
-			if (x == 0) edges.insert({Point(-1, y), Point(x, y)});
+			if (x == 0) foundEdges.insert({Point(-1, y), Point(x, y)});
 				//Or the tile to the left is a different region
-			else if (indices[x - 1][y] != at) edges.insert({Point(x - 1, y), Point(x, y)});
+			else if (indices[x - 1][y] != at) foundEdges.insert({Point(x - 1, y), Point(x, y)});
 
 			//Same thing x4
-			if (y == 0) edges.insert({Point(x, -1), Point(x, y)});
-			else if (indices[x][y - 1] != at) edges.insert({Point(x, y - 1), Point(x, y)});
-			if (x == extent.x - 1) edges.insert({Point(x, y), Point(extent.x, y)});
-			else if (indices[x + 1][y] != at) edges.insert({Point(x + 1, y), Point(x, y)});
-			if (y == extent.y - 1) edges.insert({Point(x, y), Point(x, extent.y)});
-			else if (indices[x][y + 1] != at) edges.insert({Point(x, y + 1), Point(x, y)});
+			if (y == 0) foundEdges.insert({Point(x, -1), Point(x, y)});
+			else if (indices[x][y - 1] != at) foundEdges.insert({Point(x, y - 1), Point(x, y)});
+			if (x == extent.x - 1) foundEdges.insert({Point(x, y), Point(extent.x, y)});
+			else if (indices[x + 1][y] != at) foundEdges.insert({Point(x + 1, y), Point(x, y)});
+			if (y == extent.y - 1) foundEdges.insert({Point(x, y), Point(x, extent.y)});
+			else if (indices[x][y + 1] != at) foundEdges.insert({Point(x, y + 1), Point(x, y)});
 		}
+	}
+
+	for (const auto &pair : foundEdges) {
+		edges.push_back(pair);
 	}
 }
 
