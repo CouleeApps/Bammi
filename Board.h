@@ -24,7 +24,8 @@ struct Region {
 	std::vector<Point> points;
 	//Use a set so we don't have to worry about duplicates
 	std::set<int> neighbors;
-	int size() const { return static_cast<int>(neighbors.size()); }
+	int max() const { return static_cast<int>(neighbors.size()); }
+	int size() const { return static_cast<int>(points.size()); }
 	int index;
 	int fill;
 	int owner;

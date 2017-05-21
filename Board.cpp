@@ -136,7 +136,7 @@ bool Board::move(int index, int player) {
 	for (auto it = explodeRegions.begin(); it != explodeRegions.end(); ) {
 		//Remove from exploded region
 		Region &region = regions[*it];
-		region.fill -= region.size();
+		region.fill -= region.max();
 		//And fill each neighbor with one (optionally exploding those too)
 		for (auto &neighborIndex : region.neighbors) {
 			//We control this now
@@ -155,7 +155,7 @@ bool Board::move(int index, int player) {
 		}
 
 		//Keep going!
-		if (region.fill > region.size()) {
+		if (region.fill > region.max()) {
 			//Split!
 			explodeRegions.push_back(region.index);
 		}
@@ -169,7 +169,7 @@ bool Board::fillSlice(int index, int player) {
 		return false;
 	}
 	region.fill ++;
-	if (region.fill > region.size() &&
+	if (region.fill > region.max() &&
 	    std::find(explodeRegions.begin(), explodeRegions.end(), region.index) == explodeRegions.end()) {
 		//Split!
 		explodeRegions.push_back(region.index);

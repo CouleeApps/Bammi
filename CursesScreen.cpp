@@ -171,6 +171,7 @@ void CursesScreen::printAt(const std::string &text, const Point &position) const
 		mvaddch(current.y, current.x, ch);
 		current.x ++;
 	}
+	refresh();
 }
 
 void CursesScreen::delay(const uint64_t &milliseconds) const {

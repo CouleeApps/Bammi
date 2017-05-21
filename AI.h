@@ -9,20 +9,18 @@
 #include "Board.h"
 
 class AI {
-	Board *board;
-	std::vector<int> myRegions;
-	int player;
+	Board *mBoard;
+	std::vector<int> mRegions;
+	int mPlayer;
 
 	void updateMyRegions();
-	bool basicMove(int maxSize, int &move);
-	bool obviousExplodeMove(int &move);
-	bool winningMove(int &move);
-	bool highestWeightedMove(int &move);
-
+	bool isWinningMove(int move);
+	bool isLosingMove(int move);
 	float getMoveWeight(int move);
+	int getPlayerClaimedCount(const Board &input, int move, int player);
 
 public:
-	AI(Board *board, int player) : board(board), player(player) {}
+	AI(Board *board, int player) : mBoard(board), mPlayer(player) {}
 	bool getMove(int &move);
 };
 

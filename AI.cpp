@@ -9,128 +9,44 @@
 #include "Screen.h"
 
 void AI::updateMyRegions() {
-	myRegions.clear();
-	for (int i = 0; i < board->regions.size(); i ++) {
-		if (board->regions[i].owner == player) {
-			myRegions.push_back(i);
+	mRegions.clear();
+	for (int i = 0; i < mBoard->regions.size(); i ++) {
+		if (mBoard->regions[i].owner == mPlayer) {
+			mRegions.push_back(i);
 		}
 	}
-	std::sort(myRegions.begin(), myRegions.end(), [this](const int &a, const int &b)->bool{
-		if (board->regions[a].size() != board->regions[b].size()) {
-			return board->regions[a].size() < board->regions[b].size();
+	std::sort(mRegions.begin(), mRegions.end(), [this](const int &a, const int &b)->bool{
+		if (mBoard->regions[a].max() != mBoard->regions[b].max()) {
+			return mBoard->regions[a].max() < mBoard->regions[b].max();
 		}
-		return board->regions[a].points.size() > board->regions[b].points.size();
+		return mBoard->regions[a].size() > mBoard->regions[b].size();
 	});
 }
 
 bool AI::getMove(int &move) {
 	updateMyRegions();
 
-	//If our next move could win us the game, do that of course
-	if (winningMove(move)) {
-		return true;
-	}
-	//Try to fill up empty spaces so we have more
-	if (basicMove(5, move)) {
-		return true;
-	}
-//	//If we can chain explosions, hey why not
-//	if (obviousExplodeMove(move)) {
-//		return true;
-//	}
-
-	//Fill up smaller regions
-
-	//Can't find anything to do??
-	return highestWeightedMove(move);
-}
-
-bool AI::basicMove(int maxSize, int &move) {
-	//Find the first region with the fewest neighbors
-	std::vector<int> sortedRegions;
-	for (int i = 0; i < board->regions.size(); i ++) {
-		if (board->regions[i].owner == -1 && board->regions[i].size() <= maxSize) {
-			sortedRegions.push_back(i);
-		}
-	}
-	std::sort(sortedRegions.begin(), sortedRegions.end(), [this](const int &a, const int &b)->bool{
-		if (board->regions[a].size() != board->regions[b].size()) {
-			return board->regions[a].size() < board->regions[b].size();
-		}
-		return board->regions[a].points.size() > board->regions[b].points.size();
-	});
-
-	//Nothing free, do something more complicated
-	if (sortedRegions.size() == 0) {
-		return false;
-	}
-
-	move = sortedRegions[0];
-	myRegions.push_back(move);
-
-	return true;
-}
-
-bool AI::obviousExplodeMove(int &move) {
-	//Check if any regions bounding one of our full regions is also full
-	// If so, explode our region for super chain reaction party
-	for (auto region : myRegions) {
-		Region &myRegion = board->regions[region];
-		//Not full
-		if (myRegion.fill != myRegion.size())
-			continue;
-
-		for (auto neighbor : board->regions[region].neighbors) {
-			Region &neighborRegion = board->regions[neighbor];
-			if (neighborRegion.fill == neighborRegion.size()) {
-				//Yep it is, let's goooo
-				move = region;
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-bool AI::winningMove(int &move) {
-	//Try all of our regions
-	for (auto region : myRegions) {
-		Board copy(*board);
-		copy.move(region, player);
-
-		int winner;
-		if (copy.getWinner(winner) && winner == player) {
-			move = region;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool AI::highestWeightedMove(int &move) {
-	if (myRegions.size() == 0) {
-		return false;
-	}
-
 	//Get a list of all the moves we can make and weight them
 	float weightTotal = 0.0f;
 	std::vector<std::pair<int, float>> moveList;
-	for (const auto &region : myRegions) {
-		float weight = getMoveWeight(region);
+	for (const auto &region : mBoard->regions) {
+		//Can't move here
+		if (region.owner != mPlayer && region.owner != -1) {
+			continue;
+		}
 
-		moveList.push_back({region, weight});
+		float weight = getMoveWeight(region.index);
+		moveList.push_back({region.index, weight});
 		weightTotal += weight;
 
 		std::stringstream ss;
-		ss << '(' << board->regions[region].points[0].x << ", " << board->regions[region].points[0].y << ')';
+		ss << '(' << region.points[0].x << ", " << region.points[0].y << ')';
 		ss << ' ' << weight;
-		Screen::getScreen()->printAt(ss.str(), {board->extent.x * 4 + 2, region});
+		Screen::getScreen()->printAt(ss.str(), {mBoard->extent.x * 4 + 2, region.index});
 	}
 	if (weightTotal == 0.0f) {
 		//Oh shit
-		Screen::getScreen()->printAt("Shit", {board->extent.x * 4 + 2, 0});
+		Screen::getScreen()->printAt("Shit", {mBoard->extent.x * 4 + 2, 0});
 	}
 	//Sort highest to lowest
 	std::sort(moveList.begin(), moveList.end(), [](const auto &a, const auto &b)->bool{
@@ -139,48 +55,49 @@ bool AI::highestWeightedMove(int &move) {
 	//Use the highest
 	move = moveList[0].first;
 	return true;
+}
 
-	//Pick a random place to go
-	std::random_device rd;
-	std::uniform_real_distribution<float> dist(0, weightTotal);
+bool AI::isWinningMove(int move) {
+	//Try all of our regions
+	Board copy(*mBoard);
+	copy.move(move, mPlayer);
 
-	float weightedMove = dist(rd);
-	for (const auto &pair : moveList) {
-		if (weightedMove > pair.second) {
-			weightedMove -= pair.second;
+	int winner;
+	return copy.getWinner(winner) && winner == mPlayer;
+}
+
+bool AI::isLosingMove(int move) {
+	//If this move loses us the game on the next turn
+	Board oneAdvance(*mBoard);
+	oneAdvance.move(move, mPlayer);
+
+	//See all the moves the other player could make and if any would lose us the game
+	for (const auto &region : mBoard->regions) {
+		//Ignore us as that would mean we move twice
+		if (region.owner == mPlayer) {
 			continue;
 		}
-		move = pair.first;
-		return true;
-	}
+		Board twoAdvance(oneAdvance);
+		twoAdvance.move(region.index, region.owner);
 
-	//Couldn't pick anything?
+		int winner;
+		if (twoAdvance.getWinner(winner)) {
+			//Don't move here at all if possible
+			return true;
+		}
+	}
 	return false;
 }
 
 //Get next move's weight. Chance of the move is weight / sum(all move weights)
 float AI::getMoveWeight(int move) {
-	//Some quick things that make moves less desirable:
-	{
-		//If this move loses us the game on the next turn
-		Board oneAdvance(*board);
-		oneAdvance.move(move, player);
-
-		//See all the moves the other player could make and if any would lose us the game
-		for (const auto &region : board->regions) {
-			//Ignore us as that would mean we move twice
-			if (region.owner == player) {
-				continue;
-			}
-			Board twoAdvance(oneAdvance);
-			twoAdvance.move(region.index, region.owner);
-
-			int winner;
-			if (twoAdvance.getWinner(winner)) {
-				//Don't move here at all if possible
-				return 0.0f;
-			}
-		}
+	if (isWinningMove(move)) {
+		//Basically as big as possible
+		return 1000.f;
+	}
+	if (isLosingMove(move)) {
+		//As small as possible
+		return 0.0f;
 	}
 
 	//Some simple factors for move weight:
@@ -192,24 +109,47 @@ float AI::getMoveWeight(int move) {
 	// - If the other player can claim this tile on the next move, it's less valuable
 
 	float weight;
-	const Region &region = board->regions[move];
-	if (region.fill == region.size()) {
-		int movedClaimed = 0;
-		int currentClaimed = (int)myRegions.size();
-		//How many can it claim if we move here
-		{
-			Board testBoard(*board);
-			testBoard.move(move, player);
-			for (const auto &testRegion : testBoard.regions) {
-				if (testRegion.owner == player) {
-					movedClaimed ++;
-				}
+	const Region &region = mBoard->regions[move];
+	if (region.fill == region.max()) {
+		//How many we could claim if we moved here
+		int movedClaimed = getPlayerClaimedCount(*mBoard, move, mPlayer);
+		int currentClaimed = (int)mRegions.size();
+
+		weight = (float)(movedClaimed - currentClaimed) / (float)region.max();
+		//Also take into account the number of surrounding full regions they have
+		for (const auto &neighbor : region.neighbors) {
+			const auto &other = mBoard->regions[neighbor];
+			if (other.owner == mPlayer) {
+				continue;
+			}
+			//We could explode an opponent's tile if we pick this; it's a very good choice
+			if (other.fill == other.max()) {
+				weight += 0.5f;
 			}
 		}
+	} else if (region.owner == -1) {
+		//Unclaimed tile, it's worth more if it has fewer neighbors.
+		// It's also worth more if its neighbors are not ours (uncertain how helpful this
+		// strategy is but it makes nicer patterns)
 
-		weight = (float)(movedClaimed - currentClaimed) / (float)region.size();
+		//Implicit weight to getting new tiles, this also helps the neighbor count weight
+		// be sorted better.
+		weight = 2;
+
+		//How many neighbors are controlled by our opponent
+		int opposing = 0;
+		for (const auto &neighbor : region.neighbors) {
+			if (mBoard->regions[neighbor].owner != mPlayer && mBoard->regions[neighbor].owner != -1) {
+				opposing ++;
+			}
+		}
+		//Has some effect on weight, but not that much
+		weight += ((float)opposing / region.max()) * 0.5f;
+		//Biggest factor: the number of neighboring regions
+		weight /= region.max();
 	} else {
-		weight = (float)region.fill / (float)region.size();
+		//Our tile but nothing special about it. Try to fill it up if it's close to full
+		weight = (float)region.fill / (float)region.max();
 	}
 
 	//If moving here would let the other player claim it on the next turn, less value
@@ -217,19 +157,19 @@ float AI::getMoveWeight(int move) {
 		int opponentClaimed = 0;
 		int movedMaxOpponentClaimed = 0;
 
-		Board oneAdvance(*board);
-		oneAdvance.move(move, player);
+		Board oneAdvance(*mBoard);
+		oneAdvance.move(move, mPlayer);
 		//See if they would be able to claim it
 		for (const auto &testRegion : oneAdvance.regions) {
 			//Can't move twice in a row
-			if (testRegion.owner == player) {
+			if (testRegion.owner == mPlayer) {
 				continue;
 			}
 			opponentClaimed ++;
 
 			Board twoAdvance(oneAdvance);
 			twoAdvance.move(testRegion.index, testRegion.owner);
-			if (twoAdvance.regions[move].owner != player) {
+			if (twoAdvance.regions[move].owner != mPlayer) {
 				//Opponent can reclaim this, less valuable
 				weight *= 0.25f;
 			}
@@ -237,7 +177,7 @@ float AI::getMoveWeight(int move) {
 			//See how many our opponent could own after this move
 			int movedOpponentClaimed = 0;
 			for (const auto &twoTestRegion : twoAdvance.regions) {
-				if (twoTestRegion.owner != player) {
+				if (twoTestRegion.owner != mPlayer) {
 					movedOpponentClaimed ++;
 				}
 			}
@@ -248,8 +188,23 @@ float AI::getMoveWeight(int move) {
 		}
 
 		//And weight down the move if our opponent can gain more points from it
-		weight /= 1.0f + ((float)(movedMaxOpponentClaimed - opponentClaimed) / (float)board->regions.size());
+		weight /= 1.0f + ((float)(movedMaxOpponentClaimed - opponentClaimed) / (float)mBoard->regions.size());
 	}
 
 	return weight;
+}
+
+int AI::getPlayerClaimedCount(const Board &input, int move, int player) {
+	//How many can it claim if we move here
+	int movedClaimed = 0;
+
+	//Try the move and see what we get
+	Board testBoard(input);
+	testBoard.move(move, player);
+	for (const auto &testRegion : testBoard.regions) {
+		if (testRegion.owner == player) {
+			movedClaimed ++;
+		}
+	}
+	return movedClaimed;
 }
