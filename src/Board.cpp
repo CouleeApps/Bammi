@@ -5,8 +5,8 @@
 #include "Board.h"
 #include <random>
 
-Board::Board(Layout &layout) : mLayout(layout) {
-	for (int i = 0; i < mLayout.mRegionCount; i ++) {
+Board::Board(const Layout &layout) : mLayout(layout) {
+	for (int i = 0; i < mLayout.getRegionCount(); i ++) {
 		mRegions.push_back(Region(i));
 	}
 }
@@ -14,9 +14,9 @@ Board::Board(Layout &layout) : mLayout(layout) {
 bool Board::move(const Point &point, int player) {
 	if (point.x < 0) return false;
 	if (point.y < 0) return false;
-	if (point.x >= mLayout.mExtent.x) return false;
-	if (point.y >= mLayout.mExtent.y) return false;
-	int index = mLayout.mIndices[point.x][point.y];
+	if (point.x >= getExtent().x) return false;
+	if (point.y >= getExtent().y) return false;
+	int index = getIndex(point);
 	return move(index, player);
 }
 
@@ -32,9 +32,9 @@ bool Board::move(int index, int player) {
 	for (auto it = mExplodeRegions.begin(); it != mExplodeRegions.end(); ) {
 		//Remove from exploded region
 		Region &region = mRegions[*it];
-		region.fill -= mLayout.getRegionMax(region.index);
+		region.fill -= getRegionMax(region.index);
 		//And fill each neighbor with one (optionally exploding those too)
-		for (auto &neighborIndex : mLayout.getRegionNeighbors(region.index)) {
+		for (auto &neighborIndex : getRegionNeighbors(region.index)) {
 			//We control this now
 			mRegions[neighborIndex].owner = player;
 			if (!fillSlice(neighborIndex, player)) {
@@ -51,7 +51,7 @@ bool Board::move(int index, int player) {
 		}
 
 		//Keep going!
-		if (region.fill > mLayout.getRegionMax(region.index)) {
+		if (region.fill > getRegionMax(region.index)) {
 			//Split!
 			mExplodeRegions.push_back(region.index);
 		}
@@ -65,7 +65,7 @@ bool Board::fillSlice(int index, int player) {
 		return false;
 	}
 	region.fill ++;
-	if (region.fill > mLayout.getRegionMax(region.index) &&
+	if (region.fill > getRegionMax(region.index) &&
 	    std::find(mExplodeRegions.begin(), mExplodeRegions.end(), region.index) == mExplodeRegions.end()) {
 		//Split!
 		mExplodeRegions.push_back(region.index);
@@ -98,8 +98,45 @@ bool Board::getWinner(int &winner) const {
 }
 
 bool Board::isLastMove(const Point &a) const {
-	return std::find(mLastMove.begin(), mLastMove.end(), mLayout.mIndices[a.x][a.y]) != mLastMove.end();
+	return std::find(mLastMove.begin(), mLastMove.end(), mLayout.getIndex(a)) != mLastMove.end();
 }
+
+const int Board::getIndex(const Point &p) const {
+	return mLayout.getIndex(p);
+}
+
+const Region &Board::getRegion(int index) const {
+	return mRegions[index];
+}
+
+const Region &Board::getRegion(const Point &p) const {
+	return mRegions[getIndex(p)];
+}
+
+const std::vector<Region> &Board::getRegions() const {
+	return mRegions;
+}
+
+Point Board::getExtent() const {
+	return mLayout.getExtent();
+}
+
+void Board::getRegionPoints(int index, std::vector<Point> &points) const {
+	mLayout.getRegionPoints(index, points);
+}
+
+const std::vector<int> &Board::getRegionNeighbors(int index) const {
+	return mLayout.getRegionNeighbors(index);
+}
+
+int Board::getRegionMax(int index) const {
+	return mLayout.getRegionMax(index);
+}
+
+bool Board::isEdge(const Point &a, const Point &b) const {
+	return mLayout.isEdge(a, b);
+}
+
 
 //---------------------------------------------------------------------------------------
 
@@ -136,12 +173,15 @@ bool Board::Layout::randomEmptyCell(Point &point) {
 	return true;
 }
 
-bool Board::Layout::newRegion(std::vector<Point> &regionPoints, int index) {
+bool Board::Layout::newRegion(int index) {
 	Point start;
 	//Make sure we have somewhere to start
 	if (!randomEmptyCell(start)) {
 		return false;
 	}
+
+	std::vector<Point> regionPoints;
+
 	//Mark this point as taken by this region
 	mIndices[start.x][start.y] = index;
 	regionPoints.push_back(start);
@@ -174,8 +214,7 @@ bool Board::Layout::newRegion(std::vector<Point> &regionPoints, int index) {
 
 void Board::Layout::assignRegions() {
 	//Make new regions until we run out of points
-	std::vector<Point> regionPoints;
-	for (int index = 0; newRegion(regionPoints, index); index ++) {
+	for (int index = 0; newRegion(index); index ++) {
 		mRegionCount ++;
 	}
 }
@@ -255,4 +294,16 @@ bool Board::Layout::isEdge(const Point &a, const Point &b) const {
 		return false;
 	}
 	return std::find(it->second.cbegin(), it->second.cend(), b) != it->second.cend();
+}
+
+int Board::Layout::getIndex(const Point &point) const {
+	return mIndices[point.x][point.y];
+}
+
+const Point &Board::Layout::getExtent() const {
+	return mExtent;
+}
+
+int Board::Layout::getRegionCount() const {
+	return mRegionCount;
 }
