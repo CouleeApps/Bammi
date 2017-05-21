@@ -24,8 +24,6 @@ struct Point {
 };
 
 struct Region {
-	std::vector<int> neighbors;
-	int max() const { return static_cast<int>(neighbors.size()); };
 	int index;
 	int fill;
 	int owner;
@@ -39,6 +37,7 @@ class Board {
 	friend class CoutScreen;
 
 	std::vector<std::vector<int>> mIndices;
+	std::vector<std::vector<int>> mNeighbors;
 	std::vector<std::pair<Point, Point>> mEdges;
 	std::vector<Region> mRegions;
 	std::deque<int> mExplodeRegions;
@@ -60,6 +59,8 @@ public:
 	const int &operator[](const Point &p) const { return mIndices[p.x][p.y]; }
 
 	void getRegionPoints(int index, std::vector<Point> &points) const;
+	const std::vector<int> &getRegionNeighbors(int index) const;
+	int getRegionMax(int index) const;
 
 	bool move(const Point &point, int player);
 	bool move(int index, int player);

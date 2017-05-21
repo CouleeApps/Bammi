@@ -108,20 +108,21 @@ float AI::getMoveWeight(int move) {
 
 	float weight;
 	const Region &region = mBoard->mRegions[move];
-	if (region.fill == region.max()) {
+	int max = mBoard->getRegionMax(region.index);
+	if (region.fill == max) {
 		//How many we could claim if we moved here
 		int movedClaimed = getPlayerClaimedCount(*mBoard, move, mPlayer);
 		int currentClaimed = (int)mRegions.size();
 
-		weight = (float)(movedClaimed - currentClaimed) / (float)region.max();
+		weight = (float)(movedClaimed - currentClaimed) / (float)max;
 		//Also take into account the number of surrounding full regions they have
-		for (const auto &neighbor : region.neighbors) {
+		for (const auto &neighbor : mBoard->getRegionNeighbors(region.index)) {
 			const auto &other = mBoard->mRegions[neighbor];
 			if (other.owner == mPlayer) {
 				continue;
 			}
 			//We could explode an opponent's tile if we pick this; it's a very good choice
-			if (other.fill == other.max()) {
+			if (other.fill == mBoard->getRegionMax(other.index)) {
 				weight += 0.5f;
 			}
 		}
@@ -136,18 +137,18 @@ float AI::getMoveWeight(int move) {
 
 		//How many neighbors are controlled by our opponent
 		int opposing = 0;
-		for (const auto &neighbor : region.neighbors) {
+		for (const auto &neighbor : mBoard->getRegionNeighbors(region.index)) {
 			if (mBoard->mRegions[neighbor].owner != mPlayer && mBoard->mRegions[neighbor].owner != -1) {
 				opposing ++;
 			}
 		}
 		//Has some effect on weight, but not that much
-		weight += ((float)opposing / region.max()) * 0.5f;
+		weight += ((float)opposing / max) * 0.5f;
 		//Biggest factor: the number of neighboring regions
-		weight /= region.max();
+		weight /= max;
 	} else {
 		//Our tile but nothing special about it. Try to fill it up if it's close to full
-		weight = (float)region.fill / (float)region.max();
+		weight = (float)region.fill / (float)max;
 	}
 
 	//If moving here would let the other player claim it on the next turn, less value
