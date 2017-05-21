@@ -61,7 +61,7 @@ void CoutScreen::print(const Board &board) const {
 						std::cout << " ";
 					}
 					if (x < board.getExtent().x && y < board.getExtent().y) {
-						const Region &r = board.mRegions[board[{x, y}]];
+						const Region &r = board.getRegion(board[{x, y}]);
 						switch (r.owner) {
 							case -1:
 								std::cout << " ";
@@ -70,7 +70,7 @@ void CoutScreen::print(const Board &board) const {
 								std::cout << (char)('A' + r.owner);
 								break;
 						}
-						bool moved = std::find(board.mLastMove.begin(), board.mLastMove.end(), board[{x, y}]) != board.mLastMove.end();
+						bool moved = board.isLastMove({x, y});
 						if (moved) {
 							std::cout << '*' << (r.fill % 10);
 						} else {

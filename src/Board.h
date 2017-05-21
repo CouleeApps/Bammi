@@ -35,8 +35,6 @@ struct Region {
 
 class Board {
 	friend class AI;
-	friend class CursesScreen;
-	friend class CoutScreen;
 
 public:
 	class Layout {
@@ -53,13 +51,13 @@ public:
 		void assignRegions();
 		void findNeighbors();
 		void findEdges();
-	public:
-		Layout(const Point &extent);
-
 		void getRegionPoints(int index, std::vector<Point> &points) const;
 		const std::vector<int> &getRegionNeighbors(int index) const;
 		int getRegionMax(int index) const;
 		bool isEdge(const Point &a, const Point &b) const;
+
+	public:
+		Layout(const Point &extent);
 	};
 
 private:
@@ -75,12 +73,15 @@ public:
 	int &operator[](const Point &p) { return mLayout.mIndices[p.x][p.y]; }
 	const int &operator[](const Point &p) const { return mLayout.mIndices[p.x][p.y]; }
 
+	const Region &getRegion(int index) const { return mRegions[index]; }
+
 	Point getExtent() const { return mLayout.mExtent; }
 	void getRegionPoints(int index, std::vector<Point> &points) const { mLayout.getRegionPoints(index, points); }
 	const std::vector<int> &getRegionNeighbors(int index) const { return mLayout.getRegionNeighbors(index); }
 	int getRegionMax(int index) const { return mLayout.getRegionMax(index); }
 
 	bool isEdge(const Point &a, const Point &b) const { return mLayout.isEdge(a, b); }
+	bool isLastMove(const Point &a) const;
 
 	bool move(const Point &point, int player);
 	bool move(int index, int player);

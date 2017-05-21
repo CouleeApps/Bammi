@@ -100,12 +100,8 @@ void CursesScreen::print(const Board &board) const {
 					}
 					//Center number
 					if (x < board.getExtent().x && y < board.getExtent().y) {
-						if (std::find(board.mExplodeRegions.begin(), board.mExplodeRegions.end(),
-						              board[{x, y}]) != board.mExplodeRegions.end()) {
-							mvaddch(y * 2 + 1, x * 4 + 1, '*');
-						}
 						auto color = COLOR_PAIR(0);
-						switch (board.mRegions[board[{x, y}]].owner) {
+						switch (board.getRegion(board[{x, y}]).owner) {
 							case 0:
 								color = COLOR_PAIR(1);
 								break;
@@ -115,7 +111,7 @@ void CursesScreen::print(const Board &board) const {
 							default:
 								break;
 						}
-						bool moved = std::find(board.mLastMove.begin(), board.mLastMove.end(), board[{x, y}]) != board.mLastMove.end();
+						bool moved = board.isLastMove({x, y});
 
 						if (moved) {
 							attrset(color);
@@ -125,7 +121,7 @@ void CursesScreen::print(const Board &board) const {
 						mvaddch(y * 2 + 1, x * 4 + 1, ' ');
 						attrset(color);
 						char num[3];
-						snprintf(num, 3, "%d", board.mRegions[board[{x, y}]].fill);
+						snprintf(num, 3, "%d", board.getRegion(board[{x, y}]).fill);
 						mvaddch(y * 2 + 1, x * 4 + 2, num[0]);
 						if (moved) {
 							attrset(color);

@@ -97,6 +97,10 @@ bool Board::getWinner(int &winner) const {
 	return winning;
 }
 
+bool Board::isLastMove(const Point &a) const {
+	return std::find(mLastMove.begin(), mLastMove.end(), mLayout.mIndices[a.x][a.y]) != mLastMove.end();
+}
+
 //---------------------------------------------------------------------------------------
 
 
@@ -250,5 +254,5 @@ bool Board::Layout::isEdge(const Point &a, const Point &b) const {
 	if (it == mEdges.end()) {
 		return false;
 	}
-	return std::find(it->second.cbegin(), it->second.cend(), b) == it->second.cend();
+	return std::find(it->second.cbegin(), it->second.cend(), b) != it->second.cend();
 }
