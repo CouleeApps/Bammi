@@ -126,11 +126,11 @@ bool AI::highestWeightedMove(int &move) {
 		std::stringstream ss;
 		ss << '(' << board->regions[region].points[0].x << ", " << board->regions[region].points[0].y << ')';
 		ss << ' ' << weight;
-		Screen::getScreen()->printAt({board->extent.x * 4 + 2, region}, ss.str());
+		Screen::getScreen()->printAt(ss.str(), {board->extent.x * 4 + 2, region});
 	}
 	if (weightTotal == 0.0f) {
 		//Oh shit
-		Screen::getScreen()->printAt({board->extent.x * 4 + 2, 0}, "Shit");
+		Screen::getScreen()->printAt("Shit", {board->extent.x * 4 + 2, 0});
 	}
 	//Sort highest to lowest
 	std::sort(moveList.begin(), moveList.end(), [](const auto &a, const auto &b)->bool{
@@ -207,7 +207,7 @@ float AI::getMoveWeight(int move) {
 			}
 		}
 
-		weight = (float)(movedClaimed - currentClaimed) / (float)board->regions.size();
+		weight = (float)(movedClaimed - currentClaimed) / (float)region.size();
 	} else {
 		weight = (float)region.fill / (float)region.size();
 	}

@@ -89,14 +89,23 @@ void CoutScreen::print(const Board &board) const {
 }
 
 bool CoutScreen::getMove(Point &move) const {
-	std::cin >> move.x >> move.y;
-	return true;
+	std::cout << "Your Move: " << std::endl;
+	return (bool)(std::cin >> move.x >> move.y);
 }
 
-void CoutScreen::printAt(const Point &position, const std::string &text) const {
+void CoutScreen::printAt(const std::string &text, const Point &position) const {
 	std::cout << text << std::endl;
 }
 
 void CoutScreen::delay(const uint64_t &milliseconds) const {
 	//Don't
+}
+
+bool CoutScreen::getBoardSize(Point &size) const {
+	std::cout << "Board Size: " << std::endl;
+	return (bool)(std::cin >> size.x >> size.y);
+}
+
+void CoutScreen::clear() const {
+	//No
 }

@@ -166,7 +166,7 @@ bool CursesScreen::getMove(Point &move) const {
 	return true;
 }
 
-void CursesScreen::printAt(const Point &position, const std::string &text) const {
+void CursesScreen::printAt(const std::string &text, const Point &position) const {
 	Point current(position);
 	for (const auto &ch : text) {
 		mvaddch(current.y, current.x, ch);
@@ -176,4 +176,21 @@ void CursesScreen::printAt(const Point &position, const std::string &text) const
 
 void CursesScreen::delay(const uint64_t &milliseconds) const {
 	std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+}
+
+bool CursesScreen::getBoardSize(Point &size) const {
+	printAt("Board Size: ", {0, 0});
+
+	char input[128];
+	if (getnstr(input, 128) == ERR) {
+		return false;
+	}
+
+	sscanf(input, "%d %d", &size.x, &size.y);
+
+	return true;
+}
+
+void CursesScreen::clear() const {
+	erase();
 }

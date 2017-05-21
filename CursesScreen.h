@@ -12,9 +12,11 @@ public:
 	~CursesScreen();
 	CursesScreen();
 	void print(const Board &board) const override;
-	void printAt(const Point &position, const std::string &text) const override;
+	void printAt(const std::string &text, const Point &position) const override;
 	bool getMove(Point &move) const override;
+	bool getBoardSize(Point &size) const override;
 	void delay(const uint64_t &milliseconds) const override;
+	void clear() const override;
 };
 
 #endif //BAMMI_CURSESSCREEN_H
