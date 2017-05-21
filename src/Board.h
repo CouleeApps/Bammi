@@ -70,10 +70,8 @@ private:
 public:
 	Board(Layout &layout);
 
-	int &operator[](const Point &p) { return mLayout.mIndices[p.x][p.y]; }
-	const int &operator[](const Point &p) const { return mLayout.mIndices[p.x][p.y]; }
-
-	const Region &getRegion(int index) const { return mRegions[index]; }
+	const int getIndex(const Point &p) const { return mLayout.mIndices[p.x][p.y]; }
+	const Region &getRegion(const Point &p) const { return mRegions[getIndex(p)]; }
 
 	Point getExtent() const { return mLayout.mExtent; }
 	void getRegionPoints(int index, std::vector<Point> &points) const { mLayout.getRegionPoints(index, points); }

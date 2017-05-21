@@ -61,7 +61,7 @@ void CoutScreen::print(const Board &board) const {
 						std::cout << " ";
 					}
 					if (x < board.getExtent().x && y < board.getExtent().y) {
-						const Region &r = board.getRegion(board[{x, y}]);
+						const Region &r = board.getRegion({x, y});
 						switch (r.owner) {
 							case -1:
 								std::cout << " ";

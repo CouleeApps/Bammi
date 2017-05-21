@@ -101,7 +101,7 @@ void CursesScreen::print(const Board &board) const {
 					//Center number
 					if (x < board.getExtent().x && y < board.getExtent().y) {
 						auto color = COLOR_PAIR(0);
-						switch (board.getRegion(board[{x, y}]).owner) {
+						switch (board.getRegion({x, y}).owner) {
 							case 0:
 								color = COLOR_PAIR(1);
 								break;
@@ -121,7 +121,7 @@ void CursesScreen::print(const Board &board) const {
 						mvaddch(y * 2 + 1, x * 4 + 1, ' ');
 						attrset(color);
 						char num[3];
-						snprintf(num, 3, "%d", board.getRegion(board[{x, y}]).fill);
+						snprintf(num, 3, "%d", board.getRegion({x, y}).fill);
 						mvaddch(y * 2 + 1, x * 4 + 2, num[0]);
 						if (moved) {
 							attrset(color);
