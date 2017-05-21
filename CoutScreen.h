@@ -14,6 +14,7 @@ public:
 	void print(const Board &board) const override;
 	void printAt(const Point &position, const std::string &text) const override;
 	bool getMove(Point &move) const override;
+	void delay(const uint64_t &milliseconds) const override;
 };
 
 #endif //BAMMI_COUTSCREEN_H

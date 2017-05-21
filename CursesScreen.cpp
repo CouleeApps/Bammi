@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iomanip>
 #include <curses.h>
+#include <thread>
 
 void finish(int) {
 	endwin();
@@ -157,4 +158,8 @@ void CursesScreen::printAt(const Point &position, const std::string &text) const
 		mvaddch(current.y, current.x, ch);
 		current.x ++;
 	}
+}
+
+void CursesScreen::delay(const uint64_t &milliseconds) const {
+	std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
 }

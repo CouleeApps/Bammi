@@ -1,5 +1,4 @@
 #include <iostream>
-#include <thread>
 #include "Board.h"
 #include "AI.h"
 #include "Screen.h"
@@ -27,12 +26,12 @@ int main() {
 			break;
 		}
 		screen->print(b);
-		std::this_thread::sleep_for(std::chrono::milliseconds(300));
 		int aiMove;
 		if (!ai.getMove(aiMove)) {
 			std::cout << "RIP AI" << std::endl;
 			break;
 		}
+		screen->delay(100);
 		if (!b.move(aiMove, 1)) {
 			std::cout << "No, AI" << std::endl;
 			break;
@@ -45,7 +44,7 @@ int main() {
 
 	screen->print(b);
 	std::cout << "Winner is " << winner << std::endl;
-	std::this_thread::sleep_for(std::chrono::seconds(3));
+	screen->delay(3000);
 
 	delete screen;
 }
