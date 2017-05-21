@@ -101,7 +101,7 @@ bool Board::isLastMove(const Point &a) const {
 	return std::find(mLastMove.begin(), mLastMove.end(), mLayout.getIndex(a)) != mLastMove.end();
 }
 
-const int Board::getIndex(const Point &p) const {
+int Board::getIndex(const Point &p) const {
 	return mLayout.getIndex(p);
 }
 
@@ -151,12 +151,12 @@ Board::Layout::Layout(const Point &extent) : mExtent(extent) {
 bool Board::Layout::randomEmptyCell(Point &point) {
 	//Get a list of all the empties
 	std::vector<Point> emptyPoints;
-	for (int x = 0; x < mIndices.size(); x ++) {
+	for (size_t x = 0; x < mIndices.size(); x ++) {
 		auto &col = mIndices[x];
-		for (int y = 0; y < col.size(); y ++) {
+		for (size_t y = 0; y < col.size(); y ++) {
 			auto &cell = col[y];
 			if (cell == UNASSIGNED) {
-				emptyPoints.push_back(Point(x, y));
+				emptyPoints.push_back(Point(static_cast<int>(x), static_cast<int>(y)));
 			}
 		}
 	}

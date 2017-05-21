@@ -91,11 +91,11 @@ bool CoutScreen::getMove(Point &move) const {
 	return (bool)(std::cin >> move.x >> move.y);
 }
 
-void CoutScreen::printAt(const std::string &text, const Point &position) const {
+void CoutScreen::printAt(const std::string &text, const Point &) const {
 	std::cout << text << std::endl;
 }
 
-void CoutScreen::delay(const uint64_t &milliseconds) const {
+void CoutScreen::delay(const uint64_t &) const {
 	//Don't
 }
 

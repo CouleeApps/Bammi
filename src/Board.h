@@ -80,7 +80,7 @@ public:
 	Board(const Layout &layout);
 	Point getExtent() const;
 
-	const int getIndex(const Point &p) const;
+	int getIndex(const Point &p) const;
 	const Region &getRegion(int index) const;
 	const Region &getRegion(const Point &p) const;
 	const std::vector<Region> &getRegions() const;

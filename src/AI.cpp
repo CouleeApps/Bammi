@@ -10,9 +10,9 @@
 
 void AI::updateMyRegions() {
 	mRegions.clear();
-	for (int i = 0; i < mBoard.getRegions().size(); i ++) {
-		if (mBoard.getRegion(i).owner == mPlayer) {
-			mRegions.push_back(i);
+	for (const auto &region : mBoard.getRegions()) {
+		if (region.owner == mPlayer) {
+			mRegions.push_back(region.index);
 		}
 	}
 }
