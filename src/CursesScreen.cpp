@@ -40,18 +40,18 @@ CursesScreen::~CursesScreen() {
 }
 
 void CursesScreen::print(const Board &board) const {
-	for (int y = 0; y < board.extent.y + 1; y++) {
+	for (int y = 0; y < board.mExtent.y + 1; y++) {
 		enum Pass : int {
 			TopBorder,
 			Center,
 			MaxPasses
 		};
 		for (int pass = TopBorder; pass < MaxPasses; pass++) {
-			for (int x = 0; x < board.extent.x + 1; x++) {
-				bool topEdge = std::find(board.edges.begin(), board.edges.end(), std::pair<Point, Point>{Point(x, y - 1), Point(x, y)}) != board.edges.end();
-				bool leftEdge = std::find(board.edges.begin(), board.edges.end(), std::pair<Point, Point>{Point(x - 1, y), Point(x, y)}) != board.edges.end();
-				bool leftTopEdge = std::find(board.edges.begin(), board.edges.end(), std::pair<Point, Point>{Point(x - 1, y - 1), Point(x - 1, y)}) != board.edges.end();
-				bool topLeftEdge = std::find(board.edges.begin(), board.edges.end(), std::pair<Point, Point>{Point(x - 1, y - 1), Point(x, y - 1)}) != board.edges.end();
+			for (int x = 0; x < board.mExtent.x + 1; x++) {
+				bool topEdge = std::find(board.mEdges.begin(), board.mEdges.end(), std::pair<Point, Point>{Point(x, y - 1), Point(x, y)}) != board.mEdges.end();
+				bool leftEdge = std::find(board.mEdges.begin(), board.mEdges.end(), std::pair<Point, Point>{Point(x - 1, y), Point(x, y)}) != board.mEdges.end();
+				bool leftTopEdge = std::find(board.mEdges.begin(), board.mEdges.end(), std::pair<Point, Point>{Point(x - 1, y - 1), Point(x - 1, y)}) != board.mEdges.end();
+				bool topLeftEdge = std::find(board.mEdges.begin(), board.mEdges.end(), std::pair<Point, Point>{Point(x - 1, y - 1), Point(x, y - 1)}) != board.mEdges.end();
 				if (pass == TopBorder) {
 					//Top left corner
 					move(y * 2, x * 4);
@@ -99,13 +99,13 @@ void CursesScreen::print(const Board &board) const {
 						mvaddch(y * 2 + 1, x * 4, ACS_VLINE); // ┃
 					}
 					//Center number
-					if (x < board.extent.x && y < board.extent.y) {
-						if (std::find(board.explodeRegions.begin(), board.explodeRegions.end(),
-						              board.indices[x][y]) != board.explodeRegions.end()) {
+					if (x < board.mExtent.x && y < board.mExtent.y) {
+						if (std::find(board.mExplodeRegions.begin(), board.mExplodeRegions.end(),
+						              board.mIndices[x][y]) != board.mExplodeRegions.end()) {
 							mvaddch(y * 2 + 1, x * 4 + 1, '*');
 						}
 						auto color = COLOR_PAIR(0);
-						switch (board.regions[board.indices[x][y]].owner) {
+						switch (board.mRegions[board.mIndices[x][y]].owner) {
 							case 0:
 								color = COLOR_PAIR(1);
 								break;
@@ -115,7 +115,7 @@ void CursesScreen::print(const Board &board) const {
 							default:
 								break;
 						}
-						bool moved = std::find(board.lastMove.begin(), board.lastMove.end(), board.indices[x][y]) != board.lastMove.end();
+						bool moved = std::find(board.mLastMove.begin(), board.mLastMove.end(), board.mIndices[x][y]) != board.mLastMove.end();
 
 						if (moved) {
 							attrset(color);
@@ -125,7 +125,7 @@ void CursesScreen::print(const Board &board) const {
 						mvaddch(y * 2 + 1, x * 4 + 1, ' ');
 						attrset(color);
 						char num[3];
-						snprintf(num, 3, "%d", board.regions[board.indices[x][y]].fill);
+						snprintf(num, 3, "%d", board.mRegions[board.mIndices[x][y]].fill);
 						mvaddch(y * 2 + 1, x * 4 + 2, num[0]);
 						if (moved) {
 							attrset(color);

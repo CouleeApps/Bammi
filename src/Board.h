@@ -24,16 +24,13 @@ struct Point {
 };
 
 struct Region {
-	std::vector<Point> points;
-	//Use a set so we don't have to worry about duplicates
 	std::vector<int> neighbors;
-	int max() const { return static_cast<int>(neighbors.size()); }
-	int size() const { return static_cast<int>(points.size()); }
+	int max() const { return static_cast<int>(neighbors.size()); };
 	int index;
 	int fill;
 	int owner;
 
-	Region(const std::vector<Point> &points, int index) : points(points), index(index), fill(0), owner(-1) {}
+	Region(int index) : index(index), fill(0), owner(-1) {}
 };
 
 class Board {
@@ -41,13 +38,13 @@ class Board {
 	friend class CursesScreen;
 	friend class CoutScreen;
 
-	std::vector<std::vector<int>> indices;
-	std::vector<std::pair<Point, Point>> edges;
-	std::vector<Region> regions;
-	std::deque<int> explodeRegions;
-	Point extent;
+	std::vector<std::vector<int>> mIndices;
+	std::vector<std::pair<Point, Point>> mEdges;
+	std::vector<Region> mRegions;
+	std::deque<int> mExplodeRegions;
+	Point mExtent;
 
-	std::vector<int> lastMove;
+	std::vector<int> mLastMove;
 
 	bool randomEmptyCell(Point &point);
 	bool newRegion(std::vector<Point> &regionPoints, int index);
@@ -59,8 +56,10 @@ class Board {
 public:
 	Board(const Point &extent);
 
-	int &operator[](const Point &p) { return indices[p.x][p.y]; }
-	const int &operator[](const Point &p) const { return indices[p.x][p.y]; }
+	int &operator[](const Point &p) { return mIndices[p.x][p.y]; }
+	const int &operator[](const Point &p) const { return mIndices[p.x][p.y]; }
+
+	void getRegionPoints(int index, std::vector<Point> &points) const;
 
 	bool move(const Point &point, int player);
 	bool move(int index, int player);
