@@ -78,6 +78,7 @@ private:
 	bool fillSlice(int index, int player);
 public:
 	Board(const Layout &layout);
+	Board(const Board &other) : mLayout(other.mLayout), mRegions(other.mRegions), mLastMove(), mExplodeRegions() {}
 	Point getExtent() const;
 
 	int getIndex(const Point &p) const;
