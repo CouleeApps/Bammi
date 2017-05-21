@@ -8,6 +8,7 @@
 #include <curses.h>
 #include <thread>
 #include <csignal>
+#include <cassert>
 
 void finish(int) {
 	endwin();
@@ -122,6 +123,7 @@ void CursesScreen::print(const Board &board) const {
 						snprintf(max, 3, "%X", board.getRegionMax(board.getIndex({x, y})));
 						if (fill[1]) {
 							//TODO
+							assert(false);
 						} else {
 							mvaddch(y * 2 + 1, x * 4 + 1, fill[0]);
 							mvaddch(y * 2 + 1, x * 4 + 2, '/');

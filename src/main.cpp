@@ -25,17 +25,17 @@ int main() {
 	screen->print(board);
 
 	//Load AI
-	AI ai(board, PLAYER_AI);
+	AI player2(board, PLAYER_AI);
 
 	//Main play loop
 	while (true) {
 		//Human player
 		{
-			Point p;
-			if (!screen->getMove(p)) {
+			Point move;
+			if (!screen->getMove(move)) {
 				break;
 			}
-			if (!board.move(p, PLAYER_HUMAN)) {
+			if (!board.move(move, PLAYER_HUMAN)) {
 				continue;
 			}
 			if (board.getWinner(winner)) {
@@ -46,13 +46,13 @@ int main() {
 		}
 		//AI player
 		{
-			int aiMove;
-			if (!ai.getMove(aiMove)) {
+			int move;
+			if (!player2.getMove(move)) {
 				std::cout << "RIP AI" << std::endl;
 				break;
 			}
 			screen->delay(300);
-			if (!board.move(aiMove, PLAYER_AI)) {
+			if (!board.move(move, PLAYER_AI)) {
 				std::cout << "No, AI" << std::endl;
 				break;
 			}

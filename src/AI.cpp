@@ -5,6 +5,7 @@
 #include <random>
 #include <unordered_map>
 #include <sstream>
+#include <algorithm>
 #include "AI.h"
 #include "Screen.h"
 
